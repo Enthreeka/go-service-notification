@@ -27,7 +27,9 @@ func Run(log *logger.Logger, cfg *config.Config) error {
 
 	app := fiber.New()
 
-	app.Post("/user", clientHandler.CreateUserHandler)
+	app.Post("/create", clientHandler.CreateUserHandler)
+	app.Post("/update", clientHandler.UpdateUserHandler)
+	app.Delete("/user", clientHandler.DeleteUserHandler)
 
 	log.Info("Starting http server: %s:%s", cfg.HTTPServer.TypeServer, cfg.HTTPServer.Port)
 	if err = app.Listen(fmt.Sprintf(":%s", cfg.HTTPServer.Port)); err != nil {

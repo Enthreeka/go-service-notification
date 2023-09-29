@@ -29,13 +29,12 @@ func (c *clientUsecase) CreateClient(ctx context.Context, client *entity.Client)
 	}
 
 	client.ID = uuid.New().String()
-	location, err := time.LoadLocation(client.TimeZone)
+	location, err := time.LoadLocation(client.TimeZoneDTO)
 	if err != nil {
 		return apperror.NewError("failed to load time zone", err)
 	}
 
-	clientTimeZone := time.Now().In(location)
-	client.TimeZone = clientTimeZone.String()
+	client.TimeZone = time.Now().In(location)
 
 	err = c.clientRepoPG.Create(ctx, client)
 	if err != nil {

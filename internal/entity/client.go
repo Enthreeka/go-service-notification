@@ -2,15 +2,17 @@ package entity
 
 import (
 	"strings"
+	"time"
 	"unicode/utf8"
 )
 
 type Client struct {
-	ID           string `json:"id"`
-	Tag          string `json:"tag"`
-	PhoneNumber  string `json:"phone_number"`
-	OperatorCode string `json:"operator_code"`
-	TimeZone     string `json:"time_zone"`
+	ID           string    `json:"id"`
+	Tag          string    `json:"tag"`
+	PhoneNumber  string    `json:"phone_number"`
+	OperatorCode string    `json:"operator_code"`
+	TimeZone     time.Time `json:"time_zone"`
+	TimeZoneDTO  string    `json:"time_zone_dto"`
 }
 
 func IsCorrectNumber(phoneNumber string) bool {

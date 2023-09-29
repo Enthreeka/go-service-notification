@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS client(
     phone_number char(11) unique not null,
     operator_code char(3) not null,
     tag varchar(20),
-    time_zone timestamp with time zone not null,
+    time_zone timestamptz not null,
     primary key (id)
 );
 

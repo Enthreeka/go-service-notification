@@ -36,7 +36,7 @@ func (c *clientRepositoryPG) Create(ctx context.Context, client *entity.Client) 
 
 func (c *clientRepositoryPG) Update(ctx context.Context, client *entity.Client) error {
 	var counter int
-	args := []string{}
+	args := []interface{}{}
 	var builder strings.Builder
 
 	builder.WriteString("UPDATE client SET")
@@ -59,7 +59,7 @@ func (c *clientRepositoryPG) Update(ctx context.Context, client *entity.Client) 
 		args = append(args, client.PhoneNumber)
 	}
 
-	if client.TimeZone != "" {
+	if !client.TimeZone.IsZero() {
 		counter++
 		builder.WriteString(fmt.Sprintf(" ,time_zone = $%d", counter))
 		args = append(args, client.TimeZone)
@@ -69,8 +69,7 @@ func (c *clientRepositoryPG) Update(ctx context.Context, client *entity.Client) 
 	builder.WriteString(fmt.Sprintf(" WHERE id = $%d", counter))
 	args = append(args, client.ID)
 
-	fmt.Println(builder.String())
-	_, err := c.Pool.Exec(ctx, builder.String(), args)
+	_, err := c.Pool.Exec(ctx, builder.String(), args...)
 	return err
 }
 
