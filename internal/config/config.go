@@ -29,7 +29,7 @@ type (
 )
 
 func New() (*Config, error) {
-	err := godotenv.Load("configs/server.env")
+	err := godotenv.Load("configs/config.env")
 	if err != nil {
 		return nil, err
 	}
