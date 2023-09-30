@@ -20,16 +20,24 @@ func Run(log *logger.Logger, cfg *config.Config) error {
 	defer psql.Close()
 
 	clientRepoPG := postgres2.NewClientRepositoryPG(psql)
+	notificationRepoPG := postgres2.NewNotificationRepositoryPG(psql)
 
 	clientUsecase := usecase.NewClientUsecase(clientRepoPG, log)
+	notificationUsecase := usecase.NewNotificationUsecase(notificationRepoPG, log)
 
 	clientHandler := http.NewClientHandler(clientUsecase, log)
+	notificationHandler := http.NewNotificationHandler(notificationUsecase, log)
 
 	app := fiber.New()
 
-	app.Post("/create", clientHandler.CreateUserHandler)
-	app.Post("/update", clientHandler.UpdateUserHandler)
-	app.Delete("/user", clientHandler.DeleteUserHandler)
+	v1 := app.Group("/client")
+	v1.Post("/create", clientHandler.CreateClientHandler)
+	v1.Post("/update", clientHandler.UpdateClientHandler)
+	v1.Delete("/delete", clientHandler.DeleteClientHandler)
+
+	v2 := app.Group("/notification")
+	v2.Post("/create", notificationHandler.CreateNotificationHandler)
+	v2.Delete("/:id", notificationHandler.DeleteNotificationHandler)
 
 	log.Info("Starting http server: %s:%s", cfg.HTTPServer.TypeServer, cfg.HTTPServer.Port)
 	if err = app.Listen(fmt.Sprintf(":%s", cfg.HTTPServer.Port)); err != nil {

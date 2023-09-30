@@ -11,19 +11,19 @@ import (
 )
 
 type clientHandler struct {
-	userUsecase usecase.Client
+	clientUsecase usecase.Client
 
 	log *logger.Logger
 }
 
 func NewClientHandler(clientUsecase usecase.Client, log *logger.Logger) *clientHandler {
 	return &clientHandler{
-		userUsecase: clientUsecase,
-		log:         log,
+		clientUsecase: clientUsecase,
+		log:           log,
 	}
 }
 
-func (u *clientHandler) CreateUserHandler(c *fiber.Ctx) error {
+func (u *clientHandler) CreateClientHandler(c *fiber.Ctx) error {
 	client := &entity.Client{}
 
 	err := c.BodyParser(client)
@@ -32,7 +32,7 @@ func (u *clientHandler) CreateUserHandler(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(apperror.NewError("Invalid request body", err))
 	}
 
-	err = u.userUsecase.CreateClient(context.Background(), client)
+	err = u.clientUsecase.CreateClient(context.Background(), client)
 	if err != nil {
 		if err == apperror.ErrIncorrectNumber {
 			return c.Status(fiber.StatusBadRequest).JSON(apperror.ErrIncorrectNumber)
@@ -44,7 +44,7 @@ func (u *clientHandler) CreateUserHandler(c *fiber.Ctx) error {
 	return c.SendStatus(fiber.StatusCreated)
 }
 
-func (u *clientHandler) UpdateUserHandler(c *fiber.Ctx) error {
+func (u *clientHandler) UpdateClientHandler(c *fiber.Ctx) error {
 	client := &entity.Client{}
 
 	err := c.BodyParser(client)
@@ -53,7 +53,7 @@ func (u *clientHandler) UpdateUserHandler(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(apperror.NewError("Invalid request body", err))
 	}
 
-	err = u.userUsecase.UpdateClient(context.Background(), client)
+	err = u.clientUsecase.UpdateClient(context.Background(), client)
 	if err != nil {
 		if errors.Is(err, apperror.ErrIncorrectNumber) {
 			return c.Status(fiber.StatusBadRequest).JSON(apperror.ErrIncorrectNumber)
@@ -65,7 +65,7 @@ func (u *clientHandler) UpdateUserHandler(c *fiber.Ctx) error {
 	return c.SendStatus(fiber.StatusNoContent)
 }
 
-func (u *clientHandler) DeleteUserHandler(c *fiber.Ctx) error {
+func (u *clientHandler) DeleteClientHandler(c *fiber.Ctx) error {
 	client := &entity.Client{}
 
 	err := c.BodyParser(client)
@@ -74,7 +74,7 @@ func (u *clientHandler) DeleteUserHandler(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(apperror.NewError("Invalid request body", err))
 	}
 
-	err = u.userUsecase.DeleteClient(context.Background(), client.ID)
+	err = u.clientUsecase.DeleteClient(context.Background(), client.ID)
 	if err != nil {
 		u.log.Error("delete client controller: %v", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(err)

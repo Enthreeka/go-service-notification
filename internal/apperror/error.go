@@ -12,6 +12,8 @@ type appError struct {
 
 var ErrIncorrectNumber = NewError("the number should start with 7 and with a length of 11", errors.New("incorrect_number"))
 
+var ErrIncorrectTime = NewError("the requested time is less than the present", errors.New("incorrect_time"))
+
 func (a *appError) Error() string {
 	return fmt.Sprintf("%s: %v", a.Msg, a.Err)
 }

@@ -10,3 +10,8 @@ type Client interface {
 	Update(ctx context.Context, client *entity.Client) error
 	Delete(ctx context.Context, id string) error
 }
+
+type Notification interface {
+	Create(ctx context.Context, notification *entity.Notification) error
+	Delete(ctx context.Context, id string) error
+}
