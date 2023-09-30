@@ -37,7 +37,9 @@ func Run(log *logger.Logger, cfg *config.Config) error {
 
 	v2 := app.Group("/notification")
 	v2.Post("/create", notificationHandler.CreateNotificationHandler)
-	v2.Delete("/:id", notificationHandler.DeleteNotificationHandler)
+	v2.Post("/update", notificationHandler.UpdateNotificationHandler)
+	v2.Post("/stata", notificationHandler.GetStatNotificationHandler)
+	v2.Delete("/delete", notificationHandler.DeleteNotificationHandler)
 
 	log.Info("Starting http server: %s:%s", cfg.HTTPServer.TypeServer, cfg.HTTPServer.Port)
 	if err = app.Listen(fmt.Sprintf(":%s", cfg.HTTPServer.Port)); err != nil {

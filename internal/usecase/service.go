@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"github.com/Enthreeka/go-service-notification/internal/entity"
+	"github.com/Enthreeka/go-service-notification/internal/entity/dto"
 )
 
 type Client interface {
@@ -13,5 +14,7 @@ type Client interface {
 
 type Notification interface {
 	CreateNotification(ctx context.Context, notification *entity.Notification) error
-	DeleteNotification(ctx context.Context, id string) error
+	UpdateNotification(ctx context.Context, request *dto.UpdateNotificationRequest) error
+	DeleteNotification(ctx context.Context, request *dto.DeleteNotificationRequest) error
+	GetByCreateAt(ctx context.Context, request *dto.GetNotificationRequest) ([]entity.Notification, error)
 }

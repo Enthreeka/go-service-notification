@@ -3,7 +3,7 @@ package entity
 import "time"
 
 type Notification struct {
-	ID             string           `json:"id"`
+	ID             string           `json:"id,omitempty"`
 	Message        string           `json:"message"`
 	CreateAt       string           `json:"create_at"`
 	ExpiresAt      string           `json:"expires_at"`
@@ -11,7 +11,7 @@ type Notification struct {
 }
 
 type ClientProperty struct {
-	PhoneNumber  string `json:"phone_number"`
+	Tag          string `json:"tag"`
 	OperatorCode string `json:"operator_code"`
 }
 
