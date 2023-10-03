@@ -6,6 +6,7 @@ import (
 	"github.com/Enthreeka/go-service-notification/internal/entity"
 	"github.com/Enthreeka/go-service-notification/internal/repo"
 	"github.com/Enthreeka/go-service-notification/pkg/postgres"
+	"github.com/jackc/pgx/v5"
 	"strings"
 )
 
@@ -15,24 +16,66 @@ type clientRepositoryPG struct {
 
 func NewClientRepositoryPG(postgres *postgres.Postgres) repo.Client {
 	return &clientRepositoryPG{
-		postgres,
+		Postgres: postgres,
 	}
 }
 
-func (c *clientRepositoryPG) Create(ctx context.Context, client *entity.Client) error {
-	query := `INSERT INTO client 
-		(id,tag,time_zone,phone_number,operator_code)
-				VALUES ($1,$2,$3,$4,$5)`
+func (c *clientRepositoryPG) checkClientProperties(ctx context.Context, client *entity.ClientProperty) (bool, error) {
+	query := `SELECT exists(SELECT 1 FROM client_properties WHERE tag = $1 AND operator_code = $2);`
+	var exist bool
 
-	_, err := c.Pool.Exec(ctx, query,
-		client.ID,
-		client.Tag,
+	err := c.Pool.QueryRow(ctx, query, exist).Scan(&client.Tag, &client.OperatorCode)
+	return exist, err
+}
+
+func (c *clientRepositoryPG) Create(ctx context.Context, client *entity.Client) error {
+	queryClient := `INSERT INTO client 
+		(id_client_properties,time_zone,phone_number)
+				VALUES ($1,$2,$3,$4)`
+
+	queryClientProperty := `INSERT INTO client_properties
+							(id,tag,operator_code)
+							VALUES ($1,$2,$3)`
+
+	tx, err := c.Pool.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		if err != nil {
+			tx.Rollback(context.TODO())
+		} else {
+			tx.Commit(context.TODO())
+		}
+	}()
+
+	propertyExist, err := c.checkClientProperties(ctx, &client.ClientProperty)
+	if err != nil {
+		return err
+	}
+
+	if propertyExist {
+		_, err = tx.Exec(ctx, queryClientProperty,
+			client.ClientPropertyID,
+			client.ClientProperty.Tag,
+			client.ClientProperty.OperatorCode,
+		)
+	}
+
+	_, err = tx.Exec(ctx, queryClient,
+		client.ClientPropertyID,
 		client.TimeZone,
 		client.PhoneNumber,
-		client.OperatorCode,
 	)
+
 	return err
 }
+
+// Необходимо реализовать обновление атрибутов клиента
+// Если попало поле тега с оператором кода, сперва проверяем, есть ли такие в таблице client_properties
+// В случае, если есть получаем id из данной таблицы, и обновляем с новыми атрибутами и новым внешним ключом
+// В случае, если нет создаем новое поле в таблице client_properties и добавляем его к новым атрибутом
 
 func (c *clientRepositoryPG) Update(ctx context.Context, client *entity.Client) error {
 	var counter int
@@ -41,16 +84,16 @@ func (c *clientRepositoryPG) Update(ctx context.Context, client *entity.Client) 
 
 	builder.WriteString("UPDATE client SET")
 
-	if client.Tag != "" {
+	if client.ClientProperty.Tag != "" {
 		counter++
 		builder.WriteString(fmt.Sprintf(" tag = $%d", counter))
-		args = append(args, client.Tag)
+		args = append(args, client.ClientProperty.Tag)
 	}
 
-	if client.OperatorCode != "" {
+	if client.ClientProperty.OperatorCode != "" {
 		counter++
 		builder.WriteString(fmt.Sprintf(" ,operator_code = $%d", counter))
-		args = append(args, client.OperatorCode)
+		args = append(args, client.ClientProperty.OperatorCode)
 	}
 
 	if client.PhoneNumber != "" {

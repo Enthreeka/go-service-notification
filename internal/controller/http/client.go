@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/Enthreeka/go-service-notification/internal/apperror"
 	"github.com/Enthreeka/go-service-notification/internal/entity"
+	"github.com/Enthreeka/go-service-notification/internal/entity/dto"
 	"github.com/Enthreeka/go-service-notification/internal/usecase"
 	"github.com/Enthreeka/go-service-notification/pkg/logger"
 	"github.com/gofiber/fiber/v2"
@@ -24,7 +25,7 @@ func NewClientHandler(clientUsecase usecase.Client, log *logger.Logger) *clientH
 }
 
 func (u *clientHandler) CreateClientHandler(c *fiber.Ctx) error {
-	client := &entity.Client{}
+	client := &dto.CreateClientRequest{}
 
 	err := c.BodyParser(client)
 	if err != nil {

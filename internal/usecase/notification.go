@@ -23,9 +23,29 @@ func NewNotificationUsecase(notificationRepoPG repo.Notification, log *logger.Lo
 	}
 }
 
-func (n *notificationUsecase) CreateNotification(ctx context.Context, notification *entity.Notification) error {
-	if !entity.IsCorrectTime(notification.ExpiresAt) || !entity.IsCorrectTime(notification.CreateAt) {
+func (n *notificationUsecase) CreateNotification(ctx context.Context, request *dto.CreateNotificationRequest) error {
+	if !entity.IsCorrectTime(request.ExpiresAt) || !entity.IsCorrectTime(request.CreateAt) {
 		return apperror.ErrIncorrectTime
+	}
+
+	notification := &entity.Notification{
+		Message:   request.Message,
+		CreateAt:  request.CreateAt,
+		ExpiresAt: request.ExpiresAt,
+	}
+
+	multiple := make(map[string][]string, len(request.Tags)*len(request.OperatorCodes))
+
+	for _, tag := range request.Tags {
+		for _, code := range request.OperatorCodes {
+
+			if storeTag, ok := multiple[tag.Tag]; ok {
+				storeTag = append(storeTag, code.OperatorCode)
+			} else {
+				multiple[tag.Tag] = append(multiple[tag.Tag], code.OperatorCode)
+			}
+
+		}
 	}
 
 	err := n.notificationRepoPG.Create(ctx, notification)
@@ -37,7 +57,6 @@ func (n *notificationUsecase) CreateNotification(ctx context.Context, notificati
 }
 
 func (n *notificationUsecase) UpdateNotification(ctx context.Context, request *dto.UpdateNotificationRequest) error {
-
 	t, err := time.Parse("", request.ExpiresAt)
 	notification := &entity.Notification{
 		Message:   request.Message,
@@ -56,7 +75,7 @@ func (n *notificationUsecase) UpdateNotification(ctx context.Context, request *d
 	return nil
 }
 
-func (n *notificationUsecase) DeleteNotification(ctx context.Context, request *dto.DeleteNotificationRequest) error {
+func (n *notificationUsecase) DeleteNotification(ctx context.Context, request *dto.TimeNotificationRequest) error {
 	expiresAtTime, err := time.Parse("15:04 02.01.2006", request.CreateAt)
 	if err != nil {
 		return err
@@ -70,7 +89,7 @@ func (n *notificationUsecase) DeleteNotification(ctx context.Context, request *d
 	return nil
 }
 
-func (n *notificationUsecase) GetByCreateAt(ctx context.Context, request *dto.GetNotificationRequest) ([]entity.Notification, error) {
+func (n *notificationUsecase) GetByCreateTime(ctx context.Context, request *dto.TimeNotificationRequest) ([]entity.Notification, error) {
 	expiresAtTime, err := time.Parse("15:04 02.01.2006", request.CreateAt)
 	if err != nil {
 		return nil, err

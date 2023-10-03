@@ -3,7 +3,6 @@ package http
 import (
 	"context"
 	"github.com/Enthreeka/go-service-notification/internal/apperror"
-	"github.com/Enthreeka/go-service-notification/internal/entity"
 	"github.com/Enthreeka/go-service-notification/internal/entity/dto"
 	"github.com/Enthreeka/go-service-notification/internal/usecase"
 	"github.com/Enthreeka/go-service-notification/pkg/logger"
@@ -24,7 +23,8 @@ func NewNotificationHandler(notificationUsecase usecase.Notification, log *logge
 }
 
 func (n *notificationHandler) CreateNotificationHandler(c *fiber.Ctx) error {
-	notificationRequest := &entity.Notification{}
+	//notificationRequest := &entity.Notification{}
+	notificationRequest := &dto.CreateNotificationRequest{}
 
 	err := c.BodyParser(notificationRequest)
 	if err != nil {
@@ -66,7 +66,7 @@ func (n *notificationHandler) UpdateNotificationHandler(c *fiber.Ctx) error {
 }
 
 func (n *notificationHandler) DeleteNotificationHandler(c *fiber.Ctx) error {
-	notificationRequest := &dto.DeleteNotificationRequest{}
+	notificationRequest := &dto.TimeNotificationRequest{}
 
 	err := c.BodyParser(notificationRequest)
 	if err != nil {
@@ -84,7 +84,7 @@ func (n *notificationHandler) DeleteNotificationHandler(c *fiber.Ctx) error {
 }
 
 func (n *notificationHandler) GetStatNotificationHandler(c *fiber.Ctx) error {
-	notificationRequest := &dto.GetNotificationRequest{}
+	notificationRequest := &dto.TimeNotificationRequest{}
 
 	err := c.BodyParser(notificationRequest)
 	if err != nil {
@@ -92,7 +92,7 @@ func (n *notificationHandler) GetStatNotificationHandler(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(apperror.NewError("Invalid request body", err))
 	}
 
-	stat, err := n.notificationUsecase.GetByCreateAt(context.Background(), notificationRequest)
+	stat, err := n.notificationUsecase.GetByCreateTime(context.Background(), notificationRequest)
 	if err != nil {
 		n.log.Error("get notification controller: %v", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(err)

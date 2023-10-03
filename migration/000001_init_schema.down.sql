@@ -5,5 +5,5 @@ DROP TABLE client;
 
 DROP TABLE notification;
 
--- DROP TABLE client_properties;
+DROP TABLE client_properties;
 

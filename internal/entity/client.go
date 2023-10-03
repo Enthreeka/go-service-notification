@@ -7,12 +7,18 @@ import (
 )
 
 type Client struct {
-	ID           string    `json:"id"`
-	Tag          string    `json:"tag"`
-	PhoneNumber  string    `json:"phone_number"`
-	OperatorCode string    `json:"operator_code"`
-	TimeZone     time.Time `json:"time_zone"`
-	TimeZoneDTO  string    `json:"time_zone_dto"`
+	ID               string         `json:"id"`
+	ClientPropertyID string         `json:"client_property_id"`
+	PhoneNumber      string         `json:"phone_number"`
+	ClientProperty   ClientProperty `json:"client_property"`
+	TimeZone         time.Time      `json:"time_zone"`
+}
+
+type Tag struct {
+	Tag string `json:"tag"`
+}
+
+type OperatorCode struct {
 }
 
 func IsCorrectNumber(phoneNumber string) bool {

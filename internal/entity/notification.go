@@ -1,6 +1,9 @@
 package entity
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
 type Notification struct {
 	ID             string           `json:"id,omitempty"`
@@ -22,6 +25,7 @@ func IsCorrectTime(value string) bool {
 	}
 
 	if !callTime.After(time.Now()) {
+		fmt.Println("Test")
 		return false
 	}
 

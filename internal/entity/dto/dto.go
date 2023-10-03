@@ -1,6 +1,10 @@
 package dto
 
-type DeleteNotificationRequest struct {
+import (
+	"github.com/Enthreeka/go-service-notification/internal/entity"
+)
+
+type TimeNotificationRequest struct {
 	CreateAt string `json:"create_at"`
 }
 
@@ -10,6 +14,24 @@ type UpdateNotificationRequest struct {
 	ExpiresAt string `json:"expires_at"`
 }
 
-type GetNotificationRequest struct {
-	CreateAt string `json:"create_at"`
+type CreateClientRequest struct {
+	PhoneNumber    string                `json:"phone_number"`
+	ClientProperty entity.ClientProperty `json:"client_property"`
+	TimeZone       string                `json:"time_zone"`
+}
+
+type CreateNotificationRequest struct {
+	Message       string         `json:"message"`
+	CreateAt      string         `json:"create_at"`
+	ExpiresAt     string         `json:"expires_at"`
+	Tags          []Tag          `json:"tags"`
+	OperatorCodes []OperatorCode `json:"operator_codes"`
+}
+
+type Tag struct {
+	Tag string `json:"tag"`
+}
+
+type OperatorCode struct {
+	OperatorCode string `json:"operator_code"`
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/Enthreeka/go-service-notification/internal/apperror"
 	"github.com/Enthreeka/go-service-notification/internal/entity"
+	"github.com/Enthreeka/go-service-notification/internal/entity/dto"
 	"github.com/Enthreeka/go-service-notification/internal/repo"
 	"github.com/Enthreeka/go-service-notification/pkg/logger"
 	"github.com/google/uuid"
@@ -23,18 +24,22 @@ func NewClientUsecase(clientRepoPG repo.Client, log *logger.Logger) Client {
 	}
 }
 
-func (c *clientUsecase) CreateClient(ctx context.Context, client *entity.Client) error {
-	if !entity.IsCorrectNumber(client.PhoneNumber) {
+func (c *clientUsecase) CreateClient(ctx context.Context, request *dto.CreateClientRequest) error {
+	if !entity.IsCorrectNumber(request.PhoneNumber) {
 		return apperror.ErrIncorrectNumber
 	}
 
-	client.ID = uuid.New().String()
-	location, err := time.LoadLocation(client.TimeZoneDTO)
+	location, err := time.LoadLocation(request.TimeZone)
 	if err != nil {
 		return apperror.NewError("failed to load time zone", err)
 	}
 
-	client.TimeZone = time.Now().In(location)
+	client := &entity.Client{
+		PhoneNumber:      request.PhoneNumber,
+		ClientProperty:   request.ClientProperty,
+		TimeZone:         time.Now().In(location),
+		ClientPropertyID: uuid.New().String(),
+	}
 
 	err = c.clientRepoPG.Create(ctx, client)
 	if err != nil {
