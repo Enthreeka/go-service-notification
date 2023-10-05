@@ -34,26 +34,67 @@ func (n *notificationUsecase) CreateNotification(ctx context.Context, request *d
 		ExpiresAt: request.ExpiresAt,
 	}
 
-	multiple := make(map[string][]string, len(request.Tags)*len(request.OperatorCodes))
+	attributes, err := n.existClientProperties(ctx, request)
+	if err != nil {
+		return apperror.NewError("failed check attribute properties", err)
+	}
 
-	for _, tag := range request.Tags {
-		for _, code := range request.OperatorCodes {
-
-			if storeTag, ok := multiple[tag.Tag]; ok {
-				storeTag = append(storeTag, code.OperatorCode)
-			} else {
-				multiple[tag.Tag] = append(multiple[tag.Tag], code.OperatorCode)
+	for key, value := range attributes {
+		for _, operatorCode := range value {
+			cp := entity.ClientProperty{
+				Tag:          key,
+				OperatorCode: operatorCode,
 			}
-
+			notification.ClientProperty = append(notification.ClientProperty, cp)
 		}
 	}
 
-	err := n.notificationRepoPG.Create(ctx, notification)
+	err = n.notificationRepoPG.Create(ctx, notification)
 	if err != nil {
 		return apperror.NewError("failed to create notification in postgres", err)
 	}
 
 	return nil
+}
+
+func (n *notificationUsecase) existClientProperties(ctx context.Context, request *dto.CreateNotificationRequest) (map[string][]string, error) {
+	attributesMap := make(map[string][]entity.Attribute, len(request.Tags))
+
+	for _, t := range request.Tags {
+		for _, operator := range request.OperatorCodes {
+			c := entity.Attribute{
+				OperatorCode: operator.OperatorCode,
+				Exist:        false,
+			}
+
+			if _, ok := attributesMap[t.Tag]; ok {
+				attributesMap[t.Tag] = append(attributesMap[t.Tag], c)
+			} else {
+				attributesMap[t.Tag] = append(attributesMap[t.Tag], c)
+			}
+		}
+	}
+
+	err := n.notificationRepoPG.CheckClientProperties(ctx, attributesMap)
+	if err != nil {
+		return nil, err
+	}
+
+	filteredAttributesMap := make(map[string][]string)
+	for key, value := range attributesMap {
+		for _, attribute := range value {
+			if attribute.Exist == true {
+
+				if _, ok := filteredAttributesMap[key]; ok {
+					filteredAttributesMap[key] = append(filteredAttributesMap[key], attribute.OperatorCode)
+				} else {
+					filteredAttributesMap[key] = append(filteredAttributesMap[key], attribute.OperatorCode)
+				}
+			}
+		}
+	}
+
+	return filteredAttributesMap, nil
 }
 
 func (n *notificationUsecase) UpdateNotification(ctx context.Context, request *dto.UpdateNotificationRequest) error {

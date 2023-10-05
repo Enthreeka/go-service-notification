@@ -20,18 +20,18 @@ func NewClientRepositoryPG(postgres *postgres.Postgres) repo.Client {
 	}
 }
 
-func (c *clientRepositoryPG) checkClientProperties(ctx context.Context, client *entity.ClientProperty) (bool, error) {
-	query := `SELECT exists(SELECT 1 FROM client_properties WHERE tag = $1 AND operator_code = $2);`
-	var exist bool
+func (c *clientRepositoryPG) getClientProperties(ctx context.Context, client *entity.ClientProperty) (string, error) {
+	query := `SELECT id FROM client_properties WHERE tag = $1 AND operator_code = $2`
+	var id string
 
-	err := c.Pool.QueryRow(ctx, query, exist).Scan(&client.Tag, &client.OperatorCode)
-	return exist, err
+	err := c.Pool.QueryRow(ctx, query, client.Tag, client.OperatorCode).Scan(&id)
+	return id, err
 }
 
 func (c *clientRepositoryPG) Create(ctx context.Context, client *entity.Client) error {
 	queryClient := `INSERT INTO client 
 		(id_client_properties,time_zone,phone_number)
-				VALUES ($1,$2,$3,$4)`
+				VALUES ($1,$2,$3)`
 
 	queryClientProperty := `INSERT INTO client_properties
 							(id,tag,operator_code)
@@ -50,17 +50,19 @@ func (c *clientRepositoryPG) Create(ctx context.Context, client *entity.Client) 
 		}
 	}()
 
-	propertyExist, err := c.checkClientProperties(ctx, &client.ClientProperty)
+	clientPropertyID, err := c.getClientProperties(ctx, &client.ClientProperty)
 	if err != nil {
-		return err
-	}
-
-	if propertyExist {
-		_, err = tx.Exec(ctx, queryClientProperty,
-			client.ClientPropertyID,
-			client.ClientProperty.Tag,
-			client.ClientProperty.OperatorCode,
-		)
+		if err == pgx.ErrNoRows {
+			_, err = tx.Exec(ctx, queryClientProperty,
+				client.ClientPropertyID,
+				client.ClientProperty.Tag,
+				client.ClientProperty.OperatorCode,
+			)
+		} else {
+			return err
+		}
+	} else {
+		client.ClientPropertyID = clientPropertyID
 	}
 
 	_, err = tx.Exec(ctx, queryClient,

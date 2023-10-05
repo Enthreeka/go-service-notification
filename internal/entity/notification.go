@@ -18,6 +18,11 @@ type ClientProperty struct {
 	OperatorCode string `json:"operator_code"`
 }
 
+type Attribute struct {
+	OperatorCode string
+	Exist        bool
+}
+
 func IsCorrectTime(value string) bool {
 	callTime, err := time.ParseInLocation("15:04 02.01.2006", value, time.Local)
 	if err != nil {

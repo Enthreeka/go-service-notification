@@ -7,12 +7,9 @@ CREATE TABLE IF NOT EXISTS client_properties(
     primary key (id)
 );
 
-
 CREATE TABLE IF NOT EXISTS notification(
     id uuid DEFAULT uuid_generate_v4(),
     id_client_properties uuid,
---     operator_code char(3) not null,
---     tag varchar(20),
     created_at timestamp not null,
     message text not null,
     expires_at timestamp not null,
@@ -48,4 +45,6 @@ CREATE TABLE IF NOT EXISTS message(
         references client (id)
 );
 
-select exists(select 1 from client_properties where id='075ff431-1a7f-4f0a-990d-f755c0ab9a7e');
+SELECT id
+FROM client_properties
+  WHERE tag = 'vip' AND operator_code = '777';

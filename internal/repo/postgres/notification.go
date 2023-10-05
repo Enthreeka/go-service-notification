@@ -15,6 +15,25 @@ type notificationRepositoryPG struct {
 	*postgres.Postgres
 }
 
+func (n *notificationRepositoryPG) CheckClientProperties(ctx context.Context, attributesMap map[string][]entity.Attribute) error {
+	query := `SELECT exists(SELECT 1 FROM client_properties WHERE tag = $1 AND operator_code = $2);`
+
+	for key, value := range attributesMap {
+		for i, attribute := range value {
+			var exist bool
+
+			err := n.Pool.QueryRow(ctx, query, key, attribute.OperatorCode).Scan(&exist)
+			if err != nil {
+				return err
+			}
+
+			value[i].Exist = exist
+		}
+	}
+
+	return nil
+}
+
 func NewNotificationRepositoryPG(postgres *postgres.Postgres) repo.Notification {
 	return &notificationRepositoryPG{
 		postgres,
