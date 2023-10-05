@@ -8,16 +8,23 @@ import (
 
 type (
 	Config struct {
-		Postgres    Postgres    `json:"postgres"`
-		HTTPServer  HTTPServer  `json:"http_server"`
-		ExternalAPI ExternalAPI `json:"external_api"`
+		Postgres                Postgres                `json:"postgres"`
+		NotificationHTTTPServer NotificationHTTTPServer `json:"http_server"`
+		MailServer              MailServer              `json:"mail_server"`
+		ExternalAPI             ExternalAPI             `json:"external_api"`
 	}
 
 	Postgres struct {
 		URL string `json:"url"`
 	}
 
-	HTTPServer struct {
+	NotificationHTTTPServer struct {
+		Hostname   string `json:"hostname"`
+		Port       string `json:"port"`
+		TypeServer string `json:"type_server"`
+	}
+
+	MailServer struct {
 		Hostname   string `json:"hostname"`
 		Port       string `json:"port"`
 		TypeServer string `json:"type_server"`
@@ -38,10 +45,15 @@ func New() (*Config, error) {
 		Postgres: Postgres{
 			URL: os.Getenv("POSTGRES_URL"),
 		},
-		HTTPServer: HTTPServer{
-			Hostname:   os.Getenv("HTTP_HOSTNAME"),
-			Port:       os.Getenv("HTTP_PORT"),
-			TypeServer: os.Getenv("HTTP_TYPE_SERVER"),
+		NotificationHTTTPServer: NotificationHTTTPServer{
+			Hostname:   os.Getenv("NOTIFICATION_HTTP_HOSTNAME"),
+			Port:       os.Getenv("NOTIFICATION_HTTP_PORT"),
+			TypeServer: os.Getenv("NOTIFICATION_HTTP_TYPE_SERVER"),
+		},
+		MailServer: MailServer{
+			Hostname:   os.Getenv("MAIL_HTTP_HOSTNAME"),
+			Port:       os.Getenv("MAIL_HTTP_PORT"),
+			TypeServer: os.Getenv("MAIL_HTTP_TYPE_SERVER"),
 		},
 		ExternalAPI: ExternalAPI{
 			JWT: os.Getenv("JWT"),

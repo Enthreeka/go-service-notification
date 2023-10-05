@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 	"github.com/Enthreeka/go-service-notification/internal/config"
-	"github.com/Enthreeka/go-service-notification/internal/controller/http"
-	postgres2 "github.com/Enthreeka/go-service-notification/internal/repo/postgres"
-	"github.com/Enthreeka/go-service-notification/internal/usecase"
+	http2 "github.com/Enthreeka/go-service-notification/internal/notification/controller/http"
+	postgres3 "github.com/Enthreeka/go-service-notification/internal/notification/repo/postgres"
+	usecase2 "github.com/Enthreeka/go-service-notification/internal/notification/usecase"
 	"github.com/Enthreeka/go-service-notification/pkg/logger"
 	"github.com/Enthreeka/go-service-notification/pkg/postgres"
 	"github.com/gofiber/fiber/v2"
@@ -19,14 +19,14 @@ func Run(log *logger.Logger, cfg *config.Config) error {
 	}
 	defer psql.Close()
 
-	clientRepoPG := postgres2.NewClientRepositoryPG(psql)
-	notificationRepoPG := postgres2.NewNotificationRepositoryPG(psql)
+	clientRepoPG := postgres3.NewClientRepositoryPG(psql)
+	notificationRepoPG := postgres3.NewNotificationRepositoryPG(psql)
 
-	clientUsecase := usecase.NewClientUsecase(clientRepoPG, log)
-	notificationUsecase := usecase.NewNotificationUsecase(notificationRepoPG, log)
+	clientUsecase := usecase2.NewClientUsecase(clientRepoPG, log)
+	notificationUsecase := usecase2.NewNotificationUsecase(notificationRepoPG, log)
 
-	clientHandler := http.NewClientHandler(clientUsecase, log)
-	notificationHandler := http.NewNotificationHandler(notificationUsecase, log)
+	clientHandler := http2.NewClientHandler(clientUsecase, log)
+	notificationHandler := http2.NewNotificationHandler(notificationUsecase, log)
 
 	app := fiber.New()
 
@@ -41,8 +41,8 @@ func Run(log *logger.Logger, cfg *config.Config) error {
 	v2.Post("/stata", notificationHandler.GetStatNotificationHandler)
 	v2.Delete("/delete", notificationHandler.DeleteNotificationHandler)
 
-	log.Info("Starting http server: %s:%s", cfg.HTTPServer.TypeServer, cfg.HTTPServer.Port)
-	if err = app.Listen(fmt.Sprintf(":%s", cfg.HTTPServer.Port)); err != nil {
+	log.Info("Starting http server: %s:%s", cfg.NotificationHTTTPServer.TypeServer, cfg.NotificationHTTTPServer.Port)
+	if err = app.Listen(fmt.Sprintf(":%s", cfg.NotificationHTTTPServer.Port)); err != nil {
 		log.Fatal("Server listening failed:%s", err)
 	}
 

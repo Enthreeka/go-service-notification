@@ -42,3 +42,9 @@ CREATE TABLE IF NOT EXISTS message(
     foreign key (client_id)
         references client (id)
 );
+
+SELECT notification.id,notification.created_at,notification.message,notification.expires_at,
+       client.id,client.phone_number
+FROM notification
+         JOIN client ON notification.id_client_properties = client.id_client_properties
+WHERE notification.created_at = $1;

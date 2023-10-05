@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/Enthreeka/go-service-notification/internal/apperror"
 	"github.com/Enthreeka/go-service-notification/internal/entity"
-	"github.com/Enthreeka/go-service-notification/internal/repo"
+	"github.com/Enthreeka/go-service-notification/internal/notification"
 	"github.com/Enthreeka/go-service-notification/pkg/postgres"
 	"github.com/jackc/pgx/v5"
 	"strings"
@@ -16,7 +16,7 @@ type notificationRepositoryPG struct {
 	*postgres.Postgres
 }
 
-func NewNotificationRepositoryPG(postgres *postgres.Postgres) repo.Notification {
+func NewNotificationRepositoryPG(postgres *postgres.Postgres) notification.NotificationStorage {
 	return &notificationRepositoryPG{
 		postgres,
 	}

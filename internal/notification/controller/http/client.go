@@ -6,18 +6,18 @@ import (
 	"github.com/Enthreeka/go-service-notification/internal/apperror"
 	"github.com/Enthreeka/go-service-notification/internal/entity"
 	"github.com/Enthreeka/go-service-notification/internal/entity/dto"
-	"github.com/Enthreeka/go-service-notification/internal/usecase"
+	"github.com/Enthreeka/go-service-notification/internal/notification"
 	"github.com/Enthreeka/go-service-notification/pkg/logger"
 	"github.com/gofiber/fiber/v2"
 )
 
 type clientHandler struct {
-	clientUsecase usecase.Client
+	clientUsecase notification.ClientService
 
 	log *logger.Logger
 }
 
-func NewClientHandler(clientUsecase usecase.Client, log *logger.Logger) *clientHandler {
+func NewClientHandler(clientUsecase notification.ClientService, log *logger.Logger) *clientHandler {
 	return &clientHandler{
 		clientUsecase: clientUsecase,
 		log:           log,

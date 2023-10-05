@@ -5,18 +5,18 @@ import (
 	"github.com/Enthreeka/go-service-notification/internal/apperror"
 	"github.com/Enthreeka/go-service-notification/internal/entity"
 	"github.com/Enthreeka/go-service-notification/internal/entity/dto"
-	"github.com/Enthreeka/go-service-notification/internal/repo"
+	"github.com/Enthreeka/go-service-notification/internal/notification"
 	"github.com/Enthreeka/go-service-notification/pkg/logger"
 	"time"
 )
 
 type notificationUsecase struct {
-	notificationRepoPG repo.Notification
+	notificationRepoPG notification.NotificationStorage
 
 	log *logger.Logger
 }
 
-func NewNotificationUsecase(notificationRepoPG repo.Notification, log *logger.Logger) Notification {
+func NewNotificationUsecase(notificationRepoPG notification.NotificationStorage, log *logger.Logger) notification.NotificationService {
 	return &notificationUsecase{
 		notificationRepoPG: notificationRepoPG,
 		log:                log,

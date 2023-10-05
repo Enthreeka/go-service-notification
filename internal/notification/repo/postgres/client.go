@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/Enthreeka/go-service-notification/internal/entity"
-	"github.com/Enthreeka/go-service-notification/internal/repo"
+	"github.com/Enthreeka/go-service-notification/internal/notification"
 	"github.com/Enthreeka/go-service-notification/pkg/postgres"
 	"github.com/jackc/pgx/v5"
 	"strings"
@@ -14,7 +14,7 @@ type clientRepositoryPG struct {
 	*postgres.Postgres
 }
 
-func NewClientRepositoryPG(postgres *postgres.Postgres) repo.Client {
+func NewClientRepositoryPG(postgres *postgres.Postgres) notification.ClientStorage {
 	return &clientRepositoryPG{
 		Postgres: postgres,
 	}

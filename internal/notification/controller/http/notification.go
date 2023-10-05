@@ -5,18 +5,18 @@ import (
 	"errors"
 	"github.com/Enthreeka/go-service-notification/internal/apperror"
 	"github.com/Enthreeka/go-service-notification/internal/entity/dto"
-	"github.com/Enthreeka/go-service-notification/internal/usecase"
+	"github.com/Enthreeka/go-service-notification/internal/notification"
 	"github.com/Enthreeka/go-service-notification/pkg/logger"
 	"github.com/gofiber/fiber/v2"
 )
 
 type notificationHandler struct {
-	notificationUsecase usecase.Notification
+	notificationUsecase notification.NotificationService
 
 	log *logger.Logger
 }
 
-func NewNotificationHandler(notificationUsecase usecase.Notification, log *logger.Logger) *notificationHandler {
+func NewNotificationHandler(notificationUsecase notification.NotificationService, log *logger.Logger) *notificationHandler {
 	return &notificationHandler{
 		notificationUsecase: notificationUsecase,
 		log:                 log,

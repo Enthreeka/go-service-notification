@@ -5,7 +5,7 @@ import (
 	"github.com/Enthreeka/go-service-notification/internal/apperror"
 	"github.com/Enthreeka/go-service-notification/internal/entity"
 	"github.com/Enthreeka/go-service-notification/internal/entity/dto"
-	"github.com/Enthreeka/go-service-notification/internal/repo"
+	"github.com/Enthreeka/go-service-notification/internal/notification"
 	"github.com/Enthreeka/go-service-notification/pkg/logger"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
@@ -13,12 +13,12 @@ import (
 )
 
 type clientUsecase struct {
-	clientRepoPG repo.Client
+	clientRepoPG notification.ClientStorage
 
 	log *logger.Logger
 }
 
-func NewClientUsecase(clientRepoPG repo.Client, log *logger.Logger) Client {
+func NewClientUsecase(clientRepoPG notification.ClientStorage, log *logger.Logger) notification.ClientService {
 	return &clientUsecase{
 		clientRepoPG: clientRepoPG,
 		log:          log,
@@ -56,6 +56,7 @@ func (c *clientUsecase) UpdateClient(ctx context.Context, request *dto.UpdateCli
 			return apperror.ErrIncorrectNumber
 		}
 	}
+
 	client := &entity.Client{
 		ID:               request.ID,
 		ClientPropertyID: request.ClientPropertyID,
@@ -68,6 +69,7 @@ func (c *clientUsecase) UpdateClient(ctx context.Context, request *dto.UpdateCli
 		if err != nil {
 			return apperror.NewError("failed to load time zone", err)
 		}
+
 		client.TimeZone = time.Now().In(location)
 	}
 
