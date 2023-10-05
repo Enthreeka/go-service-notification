@@ -6,21 +6,13 @@ import (
 )
 
 type Notification struct {
-	ID             string           `json:"id,omitempty"`
-	Message        string           `json:"message"`
-	CreateAt       string           `json:"create_at"`
-	ExpiresAt      string           `json:"expires_at"`
+	ID               string   `json:"id,omitempty"`
+	Message          string   `json:"message"`
+	CreateAt         string   `json:"create_at"`
+	ExpiresAt        string   `json:"expires_at"`
+	ClientPropertyID []string `json:"id_client_properties"`
+
 	ClientProperty []ClientProperty `json:"client_property"`
-}
-
-type ClientProperty struct {
-	Tag          string `json:"tag"`
-	OperatorCode string `json:"operator_code"`
-}
-
-type Attribute struct {
-	OperatorCode string
-	Exist        bool
 }
 
 func IsCorrectTime(value string) bool {

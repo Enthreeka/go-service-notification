@@ -34,20 +34,16 @@ func (n *notificationUsecase) CreateNotification(ctx context.Context, request *d
 		ExpiresAt: request.ExpiresAt,
 	}
 
-	attributes, err := n.existClientProperties(ctx, request)
+	id, err := n.existClientProperties(ctx, request)
 	if err != nil {
 		return apperror.NewError("failed check attribute properties", err)
 	}
 
-	for key, value := range attributes {
-		for _, operatorCode := range value {
-			cp := entity.ClientProperty{
-				Tag:          key,
-				OperatorCode: operatorCode,
-			}
-			notification.ClientProperty = append(notification.ClientProperty, cp)
-		}
+	if len(id) == 0 {
+		return apperror.ErrClientAttribute
 	}
+
+	notification.ClientPropertyID = id
 
 	err = n.notificationRepoPG.Create(ctx, notification)
 	if err != nil {
@@ -57,44 +53,27 @@ func (n *notificationUsecase) CreateNotification(ctx context.Context, request *d
 	return nil
 }
 
-func (n *notificationUsecase) existClientProperties(ctx context.Context, request *dto.CreateNotificationRequest) (map[string][]string, error) {
-	attributesMap := make(map[string][]entity.Attribute, len(request.Tags))
+func (n *notificationUsecase) existClientProperties(ctx context.Context, request *dto.CreateNotificationRequest) ([]string, error) {
+	attributesMap := make(map[string][]string, len(request.Tags))
 
 	for _, t := range request.Tags {
 		for _, operator := range request.OperatorCodes {
-			c := entity.Attribute{
-				OperatorCode: operator.OperatorCode,
-				Exist:        false,
-			}
+			operatorCode := operator.OperatorCode
 
 			if _, ok := attributesMap[t.Tag]; ok {
-				attributesMap[t.Tag] = append(attributesMap[t.Tag], c)
+				attributesMap[t.Tag] = append(attributesMap[t.Tag], operatorCode)
 			} else {
-				attributesMap[t.Tag] = append(attributesMap[t.Tag], c)
+				attributesMap[t.Tag] = append(attributesMap[t.Tag], operatorCode)
 			}
 		}
 	}
 
-	err := n.notificationRepoPG.CheckClientProperties(ctx, attributesMap)
+	id, err := n.notificationRepoPG.CheckClientProperties(ctx, attributesMap)
 	if err != nil {
 		return nil, err
 	}
 
-	filteredAttributesMap := make(map[string][]string)
-	for key, value := range attributesMap {
-		for _, attribute := range value {
-			if attribute.Exist == true {
-
-				if _, ok := filteredAttributesMap[key]; ok {
-					filteredAttributesMap[key] = append(filteredAttributesMap[key], attribute.OperatorCode)
-				} else {
-					filteredAttributesMap[key] = append(filteredAttributesMap[key], attribute.OperatorCode)
-				}
-			}
-		}
-	}
-
-	return filteredAttributesMap, nil
+	return id, nil
 }
 
 func (n *notificationUsecase) UpdateNotification(ctx context.Context, request *dto.UpdateNotificationRequest) error {

@@ -20,6 +20,14 @@ type CreateClientRequest struct {
 	TimeZone       string                `json:"time_zone"`
 }
 
+type UpdateClientRequest struct {
+	ID               string                `json:"id"`
+	ClientPropertyID string                `json:"id_client_properties"`
+	PhoneNumber      string                `json:"phone_number"`
+	TimeZone         string                `json:"time_zone"`
+	ClientProperty   entity.ClientProperty `json:"client_property"`
+}
+
 type CreateNotificationRequest struct {
 	Message       string         `json:"message"`
 	CreateAt      string         `json:"create_at"`

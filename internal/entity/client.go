@@ -8,10 +8,15 @@ import (
 
 type Client struct {
 	ID               string         `json:"id"`
-	ClientPropertyID string         `json:"client_property_id"`
+	ClientPropertyID string         `json:"id_client_properties"`
 	PhoneNumber      string         `json:"phone_number"`
 	ClientProperty   ClientProperty `json:"client_property"`
 	TimeZone         time.Time      `json:"time_zone"`
+}
+
+type ClientProperty struct {
+	Tag          string `json:"tag"`
+	OperatorCode string `json:"operator_code"`
 }
 
 type Tag struct {

@@ -14,6 +14,8 @@ var ErrIncorrectNumber = NewError("the number should start with 7 and with a len
 
 var ErrIncorrectTime = NewError("the requested time is less than the present", errors.New("incorrect_time"))
 
+var ErrClientAttribute = NewError("the client attribute is empty", errors.New("not_found_id"))
+
 func (a *appError) Error() string {
 	return fmt.Sprintf("%s: %v", a.Msg, a.Err)
 }

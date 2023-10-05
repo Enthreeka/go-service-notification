@@ -24,8 +24,6 @@ CREATE TABLE IF NOT EXISTS client(
     id uuid DEFAULT uuid_generate_v4(),
     id_client_properties uuid,
     phone_number char(11) unique not null,
---     operator_code char(3) not null,
---     tag varchar(20),
     time_zone timestamptz not null,
     primary key (id),
     foreign key (id_client_properties)
@@ -44,7 +42,3 @@ CREATE TABLE IF NOT EXISTS message(
     foreign key (client_id)
         references client (id)
 );
-
-SELECT id
-FROM client_properties
-  WHERE tag = 'vip' AND operator_code = '777';

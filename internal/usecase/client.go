@@ -8,6 +8,7 @@ import (
 	"github.com/Enthreeka/go-service-notification/internal/repo"
 	"github.com/Enthreeka/go-service-notification/pkg/logger"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"time"
 )
 
@@ -49,15 +50,32 @@ func (c *clientUsecase) CreateClient(ctx context.Context, request *dto.CreateCli
 	return nil
 }
 
-func (c *clientUsecase) UpdateClient(ctx context.Context, client *entity.Client) error {
-	if client.PhoneNumber != "" {
-		if !entity.IsCorrectNumber(client.PhoneNumber) {
+func (c *clientUsecase) UpdateClient(ctx context.Context, request *dto.UpdateClientRequest) error {
+	if request.PhoneNumber != "" {
+		if !entity.IsCorrectNumber(request.PhoneNumber) {
 			return apperror.ErrIncorrectNumber
 		}
+	}
+	client := &entity.Client{
+		ID:               request.ID,
+		ClientPropertyID: request.ClientPropertyID,
+		PhoneNumber:      request.PhoneNumber,
+		ClientProperty:   request.ClientProperty,
+	}
+
+	if request.TimeZone != "" {
+		location, err := time.LoadLocation(request.TimeZone)
+		if err != nil {
+			return apperror.NewError("failed to load time zone", err)
+		}
+		client.TimeZone = time.Now().In(location)
 	}
 
 	err := c.clientRepoPG.Update(ctx, client)
 	if err != nil {
+		if err == pgx.ErrNoRows {
+			return apperror.ErrClientAttribute
+		}
 		return apperror.NewError("failed to update client in postgres", err)
 	}
 

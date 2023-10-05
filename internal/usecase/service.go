@@ -8,7 +8,7 @@ import (
 
 type Client interface {
 	CreateClient(ctx context.Context, request *dto.CreateClientRequest) error
-	UpdateClient(ctx context.Context, client *entity.Client) error
+	UpdateClient(ctx context.Context, request *dto.UpdateClientRequest) error
 	DeleteClient(ctx context.Context, id string) error
 }
 

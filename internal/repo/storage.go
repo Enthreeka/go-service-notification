@@ -15,7 +15,7 @@ type Client interface {
 }
 
 type Notification interface {
-	CheckClientProperties(ctx context.Context, attributesMap map[string][]entity.Attribute) error
+	CheckClientProperties(ctx context.Context, attributesMap map[string][]string) ([]string, error)
 	Create(ctx context.Context, notification *entity.Notification) error
 	Update(ctx context.Context, notification *entity.Notification) error
 	Delete(ctx context.Context, createdAt time.Time) error

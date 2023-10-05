@@ -7,6 +7,7 @@ import (
 	"github.com/Enthreeka/go-service-notification/internal/entity"
 	"github.com/Enthreeka/go-service-notification/internal/repo"
 	"github.com/Enthreeka/go-service-notification/pkg/postgres"
+	"github.com/jackc/pgx/v5"
 	"strings"
 	"time"
 )
@@ -15,35 +16,39 @@ type notificationRepositoryPG struct {
 	*postgres.Postgres
 }
 
-func (n *notificationRepositoryPG) CheckClientProperties(ctx context.Context, attributesMap map[string][]entity.Attribute) error {
-	query := `SELECT exists(SELECT 1 FROM client_properties WHERE tag = $1 AND operator_code = $2);`
-
-	for key, value := range attributesMap {
-		for i, attribute := range value {
-			var exist bool
-
-			err := n.Pool.QueryRow(ctx, query, key, attribute.OperatorCode).Scan(&exist)
-			if err != nil {
-				return err
-			}
-
-			value[i].Exist = exist
-		}
-	}
-
-	return nil
-}
-
 func NewNotificationRepositoryPG(postgres *postgres.Postgres) repo.Notification {
 	return &notificationRepositoryPG{
 		postgres,
 	}
 }
 
+func (n *notificationRepositoryPG) CheckClientProperties(ctx context.Context, attributesMap map[string][]string) ([]string, error) {
+	query := `SELECT id FROM client_properties WHERE tag = $1 AND operator_code = $2`
+
+	var allID []string
+	for key, value := range attributesMap {
+		for _, attribute := range value {
+			var id string
+
+			err := n.Pool.QueryRow(ctx, query, key, attribute).Scan(&id)
+			if err != nil {
+				if err != pgx.ErrNoRows {
+					return nil, err
+				}
+			} else {
+				allID = append(allID, id)
+			}
+
+		}
+	}
+
+	return allID, nil
+}
+
 func (n *notificationRepositoryPG) Create(ctx context.Context, notification *entity.Notification) error {
 	query := `INSERT INTO notification
-    (tag, operator_code, created_at, message, expires_at) 
-			VALUES ($1,$2,$3,$4,$5)`
+    (id_client_properties, created_at, message, expires_at) 
+			VALUES ($1,$2,$3,$4)`
 
 	expiresAtTime, err := time.Parse("15:04 02.01.2006", notification.ExpiresAt)
 	if err != nil {
@@ -55,15 +60,15 @@ func (n *notificationRepositoryPG) Create(ctx context.Context, notification *ent
 		return err
 	}
 
-	for _, property := range notification.ClientProperty {
+	for _, propertyId := range notification.ClientPropertyID {
 		_, err = n.Pool.Exec(ctx, query,
-			property.Tag,
-			property.OperatorCode,
+			propertyId,
 			createdAtTime,
 			notification.Message,
 			expiresAtTime,
 		)
 	}
+
 	return err
 }
 
@@ -120,15 +125,16 @@ func (n *notificationRepositoryPG) Delete(ctx context.Context, createdAt time.Ti
 }
 
 func (n *notificationRepositoryPG) GetByCreateAt(ctx context.Context, createdAt time.Time) ([]entity.Notification, error) {
-	query := `SELECT message,
-					expires_at,
-					json_agg(json_build_object('tag', tag, 'operator_code', operator_code)) AS client_property
-				FROM
+	query := `SELECT notification.message,
+				   notification.expires_at,
+				   json_agg(json_build_object('tag', client_properties.tag, 'operator_code', client_properties.operator_code)) AS client_properties
+					FROM
 					notification
-				WHERE
-						created_at = $1
-				GROUP BY
-					id, message, created_at, expires_at`
+					JOIN client_properties ON notification.id_client_properties = client_properties.id
+			WHERE
+					created_at = $1
+			GROUP BY
+				 message, created_at, expires_at;`
 
 	rows, err := n.Pool.Query(ctx, query, createdAt)
 	if err != nil {

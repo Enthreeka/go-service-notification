@@ -2,6 +2,7 @@ package http
 
 import (
 	"context"
+	"errors"
 	"github.com/Enthreeka/go-service-notification/internal/apperror"
 	"github.com/Enthreeka/go-service-notification/internal/entity/dto"
 	"github.com/Enthreeka/go-service-notification/internal/usecase"
@@ -23,7 +24,6 @@ func NewNotificationHandler(notificationUsecase usecase.Notification, log *logge
 }
 
 func (n *notificationHandler) CreateNotificationHandler(c *fiber.Ctx) error {
-	//notificationRequest := &entity.Notification{}
 	notificationRequest := &dto.CreateNotificationRequest{}
 
 	err := c.BodyParser(notificationRequest)
@@ -34,9 +34,12 @@ func (n *notificationHandler) CreateNotificationHandler(c *fiber.Ctx) error {
 
 	err = n.notificationUsecase.CreateNotification(context.Background(), notificationRequest)
 	if err != nil {
-		if err == apperror.ErrIncorrectTime {
+		if errors.Is(err, apperror.ErrIncorrectTime) {
 			return c.Status(fiber.StatusBadRequest).JSON(apperror.ErrIncorrectTime)
+		} else if errors.Is(err, apperror.ErrClientAttribute) {
+			return c.Status(fiber.StatusBadRequest).JSON(apperror.ErrClientAttribute)
 		}
+
 		n.log.Error("create notification controller: %v", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(err)
 	}

@@ -46,7 +46,7 @@ func (u *clientHandler) CreateClientHandler(c *fiber.Ctx) error {
 }
 
 func (u *clientHandler) UpdateClientHandler(c *fiber.Ctx) error {
-	client := &entity.Client{}
+	client := &dto.UpdateClientRequest{}
 
 	err := c.BodyParser(client)
 	if err != nil {
@@ -58,7 +58,10 @@ func (u *clientHandler) UpdateClientHandler(c *fiber.Ctx) error {
 	if err != nil {
 		if errors.Is(err, apperror.ErrIncorrectNumber) {
 			return c.Status(fiber.StatusBadRequest).JSON(apperror.ErrIncorrectNumber)
+		} else if errors.Is(err, apperror.ErrClientAttribute) {
+			return c.Status(fiber.StatusBadRequest).JSON(apperror.ErrClientAttribute)
 		}
+
 		u.log.Error("update client controller: %v", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(err)
 	}

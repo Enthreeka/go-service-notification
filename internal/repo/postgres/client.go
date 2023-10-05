@@ -20,7 +20,7 @@ func NewClientRepositoryPG(postgres *postgres.Postgres) repo.Client {
 	}
 }
 
-func (c *clientRepositoryPG) getClientProperties(ctx context.Context, client *entity.ClientProperty) (string, error) {
+func (c *clientRepositoryPG) getClientPropertiesID(ctx context.Context, client *entity.ClientProperty) (string, error) {
 	query := `SELECT id FROM client_properties WHERE tag = $1 AND operator_code = $2`
 	var id string
 
@@ -50,7 +50,7 @@ func (c *clientRepositoryPG) Create(ctx context.Context, client *entity.Client) 
 		}
 	}()
 
-	clientPropertyID, err := c.getClientProperties(ctx, &client.ClientProperty)
+	clientPropertyID, err := c.getClientPropertiesID(ctx, &client.ClientProperty)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			_, err = tx.Exec(ctx, queryClientProperty,
@@ -86,27 +86,38 @@ func (c *clientRepositoryPG) Update(ctx context.Context, client *entity.Client) 
 
 	builder.WriteString("UPDATE client SET")
 
-	if client.ClientProperty.Tag != "" {
-		counter++
-		builder.WriteString(fmt.Sprintf(" tag = $%d", counter))
-		args = append(args, client.ClientProperty.Tag)
-	}
+	if client.ClientProperty.Tag != "" || client.ClientProperty.OperatorCode != "" {
+		clientPropertyID, err := c.getClientPropertiesID(ctx, &client.ClientProperty)
+		if err != nil {
+			if err == pgx.ErrNoRows {
+				return pgx.ErrNoRows
+			} else {
+				return err
+			}
+		}
 
-	if client.ClientProperty.OperatorCode != "" {
 		counter++
-		builder.WriteString(fmt.Sprintf(" ,operator_code = $%d", counter))
-		args = append(args, client.ClientProperty.OperatorCode)
+		builder.WriteString(fmt.Sprintf(" id_client_properties = $%d", counter))
+		args = append(args, clientPropertyID)
 	}
 
 	if client.PhoneNumber != "" {
 		counter++
-		builder.WriteString(fmt.Sprintf(" ,phone_number = $%d", counter))
+		if counter == 1 {
+			builder.WriteString(fmt.Sprintf(" phone_number = $%d", counter))
+		} else {
+			builder.WriteString(fmt.Sprintf(" ,phone_number = $%d", counter))
+		}
 		args = append(args, client.PhoneNumber)
 	}
 
 	if !client.TimeZone.IsZero() {
 		counter++
-		builder.WriteString(fmt.Sprintf(" ,time_zone = $%d", counter))
+		if counter == 1 {
+			builder.WriteString(fmt.Sprintf(" time_zone = $%d", counter))
+		} else {
+			builder.WriteString(fmt.Sprintf(" ,time_zone = $%d", counter))
+		}
 		args = append(args, client.TimeZone)
 	}
 
