@@ -1,0 +1,396 @@
+basePath: /
+definitions:
+  apperror.AppError:
+    properties:
+      message:
+        type: string
+    type: object
+  dto.CreateClientRequest:
+    properties:
+      client_property:
+        $ref: '#/definitions/entity.ClientProperty'
+      phone_number:
+        type: string
+      time_zone:
+        type: string
+    type: object
+  dto.CreateNotificationRequest:
+    properties:
+      create_at:
+        type: string
+      expires_at:
+        type: string
+      message:
+        type: string
+      operator_codes:
+        items:
+          $ref: '#/definitions/dto.OperatorCode'
+        type: array
+      tags:
+        items:
+          $ref: '#/definitions/dto.Tag'
+        type: array
+    type: object
+  dto.IDMessageRequest:
+    properties:
+      id:
+        type: string
+    type: object
+  dto.OperatorCode:
+    properties:
+      operator_code:
+        type: string
+    type: object
+  dto.Tag:
+    properties:
+      tag:
+        type: string
+    type: object
+  dto.TimeNotificationRequest:
+    properties:
+      create_at:
+        type: string
+    type: object
+  dto.UpdateClientRequest:
+    properties:
+      client_property:
+        $ref: '#/definitions/entity.ClientProperty'
+      id:
+        type: string
+      id_client_properties:
+        type: string
+      phone_number:
+        type: string
+      time_zone:
+        type: string
+    type: object
+  dto.UpdateNotificationRequest:
+    properties:
+      create_at:
+        type: string
+      expires_at:
+        type: string
+      message:
+        type: string
+    type: object
+  entity.Client:
+    properties:
+      client_property:
+        $ref: '#/definitions/entity.ClientProperty'
+      id:
+        type: string
+      id_client_properties:
+        type: string
+      phone_number:
+        type: string
+      time_zone:
+        type: string
+    type: object
+  entity.ClientProperty:
+    properties:
+      operator_code:
+        type: string
+      tag:
+        type: string
+    type: object
+  entity.MessageInfo:
+    properties:
+      count:
+        type: integer
+      created_at:
+        type: string
+      message:
+        type: string
+      notification_id:
+        type: string
+      operator_code:
+        type: string
+      phone_number:
+        type: string
+      status:
+        type: string
+      tag:
+        type: string
+    type: object
+  entity.Notification:
+    properties:
+      client_property:
+        items:
+          $ref: '#/definitions/entity.ClientProperty'
+        type: array
+      create_at:
+        type: string
+      expires_at:
+        type: string
+      id:
+        type: string
+      id_client_properties:
+        items:
+          type: string
+        type: array
+      message:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: Swagger Api for notification service
+  title: Blueprint Swagger API
+  version: "1.0"
+paths:
+  /api/client/create:
+    post:
+      consumes:
+      - application/json
+      description: create client
+      parameters:
+      - description: Client data for create
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateClientRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      summary: Create Client
+      tags:
+      - client
+  /api/client/delete:
+    delete:
+      consumes:
+      - application/json
+      description: delete client
+      parameters:
+      - description: Client ID
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/entity.Client'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      summary: Delete Client
+      tags:
+      - client
+  /api/client/update:
+    post:
+      consumes:
+      - application/json
+      description: update client
+      parameters:
+      - description: Client data for update
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateClientRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      summary: Update Client
+      tags:
+      - client
+  /api/message/group:
+    get:
+      description: get message
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              items:
+                $ref: '#/definitions/entity.MessageInfo'
+              type: array
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      summary: Get Messages Group By
+      tags:
+      - message
+  /api/message/info:
+    get:
+      consumes:
+      - application/json
+      description: get message
+      parameters:
+      - description: Get detail data from message
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/dto.IDMessageRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              items:
+                $ref: '#/definitions/entity.MessageInfo'
+              type: array
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      summary: Get Messages
+      tags:
+      - message
+  /api/notification/create:
+    post:
+      consumes:
+      - application/json
+      description: create notification
+      parameters:
+      - description: Client new notification
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateNotificationRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      summary: Create Notification
+      tags:
+      - notification
+  /api/notification/delete:
+    delete:
+      consumes:
+      - application/json
+      description: delete notification
+      parameters:
+      - description: Delete notification by his created time
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/dto.TimeNotificationRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      summary: Delete Notification
+      tags:
+      - notification
+  /api/notification/stata:
+    get:
+      consumes:
+      - application/json
+      description: delete notification
+      parameters:
+      - description: 'Get info by his created time about a specific notification '
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/dto.TimeNotificationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.Notification'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      summary: Delete Notification
+      tags:
+      - notification
+  /api/notification/update:
+    post:
+      consumes:
+      - application/json
+      description: update notification
+      parameters:
+      - description: Update already created notification
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateNotificationRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      summary: Update Notification
+      tags:
+      - notification
+swagger: "2.0"

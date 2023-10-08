@@ -5,7 +5,8 @@ import (
 	"fmt"
 )
 
-type appError struct {
+// swagger:parameters apperror.AppError
+type AppError struct {
 	Msg string `json:"message"`
 	Err error  `json:"-"`
 }
@@ -18,12 +19,12 @@ var ErrClientAttribute = NewError("the client attribute is empty", errors.New("n
 
 var ErrEmptyNotification = NewError("so far there are no mailings in the database", errors.New("not_found_notification"))
 
-func (a *appError) Error() string {
+func (a *AppError) Error() string {
 	return fmt.Sprintf("%s: %v", a.Msg, a.Err)
 }
 
-func NewError(msg string, err error) *appError {
-	return &appError{
+func NewError(msg string, err error) *AppError {
+	return &AppError{
 		Msg: msg,
 		Err: err,
 	}

@@ -3,6 +3,7 @@ package http
 import (
 	"context"
 	"errors"
+	_ "github.com/Enthreeka/go-service-notification/docs"
 	"github.com/Enthreeka/go-service-notification/internal/apperror"
 	"github.com/Enthreeka/go-service-notification/internal/entity/dto"
 	"github.com/Enthreeka/go-service-notification/internal/notification"
@@ -23,6 +24,17 @@ func NewNotificationHandler(notificationUsecase notification.NotificationService
 	}
 }
 
+// CreateNotificationHandler godoc
+// @Summary Create Notification
+// @Tags notification
+// @Description create notification
+// @Accept json
+// @Produce json
+// @Param input body dto.CreateNotificationRequest true "Client new notification"
+// @Success 201
+// @Failure 400 {object} apperror.AppError
+// @Failure 500 {object} apperror.AppError
+// @Router /api/notification/create [post]
 func (n *notificationHandler) CreateNotificationHandler(c *fiber.Ctx) error {
 	notificationRequest := &dto.CreateNotificationRequest{}
 
@@ -47,6 +59,17 @@ func (n *notificationHandler) CreateNotificationHandler(c *fiber.Ctx) error {
 	return c.SendStatus(fiber.StatusCreated)
 }
 
+// UpdateNotificationHandler godoc
+// @Summary Update Notification
+// @Tags notification
+// @Description update notification
+// @Accept json
+// @Produce json
+// @Param input body dto.UpdateNotificationRequest true "Update already created notification"
+// @Success 204
+// @Failure 400 {object} apperror.AppError
+// @Failure 500 {object} apperror.AppError
+// @Router /api/notification/update [post]
 func (n *notificationHandler) UpdateNotificationHandler(c *fiber.Ctx) error {
 	notificationRequest := &dto.UpdateNotificationRequest{}
 
@@ -68,6 +91,17 @@ func (n *notificationHandler) UpdateNotificationHandler(c *fiber.Ctx) error {
 	return c.SendStatus(fiber.StatusNoContent)
 }
 
+// DeleteNotificationHandler godoc
+// @Summary Delete Notification
+// @Tags notification
+// @Description delete notification
+// @Accept json
+// @Produce json
+// @Param input body dto.TimeNotificationRequest true "Delete notification by his created time"
+// @Success 204
+// @Failure 400 {object} apperror.AppError
+// @Failure 500 {object} apperror.AppError
+// @Router /api/notification/delete [delete]
 func (n *notificationHandler) DeleteNotificationHandler(c *fiber.Ctx) error {
 	notificationRequest := &dto.TimeNotificationRequest{}
 
@@ -86,6 +120,17 @@ func (n *notificationHandler) DeleteNotificationHandler(c *fiber.Ctx) error {
 	return c.SendStatus(fiber.StatusNoContent)
 }
 
+// GetStatNotificationHandler godoc
+// @Summary Delete Notification
+// @Tags notification
+// @Description delete notification
+// @Accept json
+// @Produce json
+// @Param input body dto.TimeNotificationRequest true "Get info by his created time about a specific notification "
+// @Success 200 {object} []entity.Notification
+// @Failure 400 {object} apperror.AppError
+// @Failure 500 {object} apperror.AppError
+// @Router /api/notification/stata [Get]
 func (n *notificationHandler) GetStatNotificationHandler(c *fiber.Ctx) error {
 	notificationRequest := &dto.TimeNotificationRequest{}
 

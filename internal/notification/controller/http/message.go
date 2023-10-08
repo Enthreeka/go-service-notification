@@ -2,6 +2,7 @@ package http
 
 import (
 	"context"
+	_ "github.com/Enthreeka/go-service-notification/docs"
 	"github.com/Enthreeka/go-service-notification/internal/apperror"
 	"github.com/Enthreeka/go-service-notification/internal/entity/dto"
 	"github.com/Enthreeka/go-service-notification/internal/notification"
@@ -22,6 +23,17 @@ func NewMessageHandler(messageUsecase notification.MessageService, log *logger.L
 	}
 }
 
+// GetDetailInfoHandler godoc
+// @Summary Get Messages
+// @Tags message
+// @Description get message
+// @Accept json
+// @Produce json
+// @Param input body dto.IDMessageRequest true "Get detail data from message"
+// @Success 200 {object} map[string][]entity.MessageInfo
+// @Failure 400 {object} apperror.AppError
+// @Failure 500 {object} apperror.AppError
+// @Router /api/message/info [get]
 func (m *messageHandler) GetDetailInfoHandler(c *fiber.Ctx) error {
 	id := &dto.IDMessageRequest{}
 
@@ -40,6 +52,14 @@ func (m *messageHandler) GetDetailInfoHandler(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(message)
 }
 
+// GetGroupByStatusHandler godoc
+// @Summary Get Messages Group By
+// @Tags message
+// @Description get message
+// @Produce json
+// @Success 200 {object} map[string][]entity.MessageInfo
+// @Failure 500 {object} apperror.AppError
+// @Router /api/message/group [get]
 func (m *messageHandler) GetGroupByStatusHandler(c *fiber.Ctx) error {
 	message, err := m.messageUsecase.GetAllGroupByStatus(context.Background())
 	if err != nil {

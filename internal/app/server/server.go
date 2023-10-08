@@ -10,6 +10,7 @@ import (
 	"github.com/Enthreeka/go-service-notification/pkg/logger"
 	"github.com/Enthreeka/go-service-notification/pkg/postgres"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/swagger"
 )
 
 func Run(log *logger.Logger, cfg *config.Config) error {
@@ -33,20 +34,24 @@ func Run(log *logger.Logger, cfg *config.Config) error {
 
 	app := fiber.New()
 
-	v1 := app.Group("/client")
-	v1.Post("/create", clientHandler.CreateClientHandler)
-	v1.Post("/update", clientHandler.UpdateClientHandler)
-	v1.Delete("/delete", clientHandler.DeleteClientHandler)
+	app.Get("/swagger/*", swagger.HandlerDefault)
 
-	v2 := app.Group("/notification")
-	v2.Post("/create", notificationHandler.CreateNotificationHandler)
-	v2.Post("/update", notificationHandler.UpdateNotificationHandler)
-	v2.Post("/stata", notificationHandler.GetStatNotificationHandler)
-	v2.Delete("/delete", notificationHandler.DeleteNotificationHandler)
+	v1 := app.Group("/api")
 
-	v3 := app.Group("/message")
-	v3.Get("/info", messageHandler.GetDetailInfoHandler)
-	v3.Get("/group", messageHandler.GetGroupByStatusHandler)
+	v2 := v1.Group("/client")
+	v2.Post("/create", clientHandler.CreateClientHandler)
+	v2.Post("/update", clientHandler.UpdateClientHandler)
+	v2.Delete("/delete", clientHandler.DeleteClientHandler)
+
+	v3 := v1.Group("/notification")
+	v3.Post("/create", notificationHandler.CreateNotificationHandler)
+	v3.Post("/update", notificationHandler.UpdateNotificationHandler)
+	v3.Get("/stata", notificationHandler.GetStatNotificationHandler)
+	v3.Delete("/delete", notificationHandler.DeleteNotificationHandler)
+
+	v4 := v1.Group("/message")
+	v4.Get("/info", messageHandler.GetDetailInfoHandler)
+	v4.Get("/group", messageHandler.GetGroupByStatusHandler)
 
 	log.Info("Starting http server: %s:%s", cfg.NotificationHTTTPServer.TypeServer, cfg.NotificationHTTTPServer.Port)
 	if err = app.Listen(fmt.Sprintf(":%s", cfg.NotificationHTTTPServer.Port)); err != nil {

@@ -3,6 +3,7 @@ package http
 import (
 	"context"
 	"errors"
+	_ "github.com/Enthreeka/go-service-notification/docs"
 	"github.com/Enthreeka/go-service-notification/internal/apperror"
 	"github.com/Enthreeka/go-service-notification/internal/entity"
 	"github.com/Enthreeka/go-service-notification/internal/entity/dto"
@@ -24,6 +25,17 @@ func NewClientHandler(clientUsecase notification.ClientService, log *logger.Logg
 	}
 }
 
+// CreateClientHandler godoc
+// @Summary Create Client
+// @Tags client
+// @Description create client
+// @Accept json
+// @Produce json
+// @Param input body dto.CreateClientRequest true "Client data for create"
+// @Success 201
+// @Failure 400 {object} apperror.AppError
+// @Failure 500 {object} apperror.AppError
+// @Router /api/client/create [post]
 func (u *clientHandler) CreateClientHandler(c *fiber.Ctx) error {
 	client := &dto.CreateClientRequest{}
 
@@ -45,6 +57,17 @@ func (u *clientHandler) CreateClientHandler(c *fiber.Ctx) error {
 	return c.SendStatus(fiber.StatusCreated)
 }
 
+// UpdateClientHandler godoc
+// @Summary Update Client
+// @Tags client
+// @Description update client
+// @Accept json
+// @Produce json
+// @Param input body dto.UpdateClientRequest true "Client data for update"
+// @Success 204
+// @Failure 400 {object} apperror.AppError
+// @Failure 500 {object} apperror.AppError
+// @Router /api/client/update [post]
 func (u *clientHandler) UpdateClientHandler(c *fiber.Ctx) error {
 	client := &dto.UpdateClientRequest{}
 
@@ -69,6 +92,17 @@ func (u *clientHandler) UpdateClientHandler(c *fiber.Ctx) error {
 	return c.SendStatus(fiber.StatusNoContent)
 }
 
+// DeleteClientHandler godoc
+// @Summary Delete Client
+// @Tags client
+// @Description delete client
+// @Accept json
+// @Produce json
+// @Param input body entity.Client true "Client ID"
+// @Success 204
+// @Failure 400 {object} apperror.AppError
+// @Failure 500 {object} apperror.AppError
+// @Router /api/client/delete [Delete]
 func (u *clientHandler) DeleteClientHandler(c *fiber.Ctx) error {
 	client := &entity.Client{}
 
