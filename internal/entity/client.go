@@ -19,13 +19,6 @@ type ClientProperty struct {
 	OperatorCode string `json:"operator_code"`
 }
 
-type Tag struct {
-	Tag string `json:"tag"`
-}
-
-type OperatorCode struct {
-}
-
 func IsCorrectNumber(phoneNumber string) bool {
 	if !strings.HasPrefix(phoneNumber, "7") {
 		return false

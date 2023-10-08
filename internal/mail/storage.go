@@ -6,5 +6,6 @@ import (
 )
 
 type MailStorage interface {
-	GetCreateAt(ctx context.Context) (*entity.Notification, error)
+	GetMailing(ctx context.Context) ([]entity.ClientsMessage, error)
+	CreateMessage(ctx context.Context, message *entity.Message) error
 }
