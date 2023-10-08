@@ -11,6 +11,7 @@ type Message struct {
 }
 
 type ClientsMessage struct {
+	ID             string `json:"id"`
 	NotificationID string `json:"notification_id"`
 	CreatedAt      string `json:"created_at"`
 	Message        string `json:"message"`
@@ -19,4 +20,16 @@ type ClientsMessage struct {
 	PhoneNumber    string `json:"phone_number"`
 
 	Status string `json:"-"`
+}
+
+type MessageInfo struct {
+	CreatedAt    string `json:"created_at,omitempty"`
+	Status       string `json:"status,omitempty"`
+	PhoneNumber  string `json:"phone_number,omitempty"`
+	Tag          string `json:"tag,omitempty"`
+	OperatorCode string `json:"operator_code,omitempty"`
+	Message      string `json:"message,omitempty"`
+
+	Count          int    `json:"count,omitempty"`
+	NotificationID string `json:"notification_id,omitempty"`
 }

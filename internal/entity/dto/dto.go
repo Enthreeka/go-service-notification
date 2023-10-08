@@ -8,6 +8,10 @@ type TimeNotificationRequest struct {
 	CreateAt string `json:"create_at"`
 }
 
+type IDMessageRequest struct {
+	Id string `json:"id"`
+}
+
 type UpdateNotificationRequest struct {
 	Message   string `json:"message"`
 	CreateAt  string `json:"create_at"`

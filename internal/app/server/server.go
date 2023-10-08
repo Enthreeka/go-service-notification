@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"github.com/Enthreeka/go-service-notification/internal/config"
 	http2 "github.com/Enthreeka/go-service-notification/internal/notification/controller/http"
-	postgres3 "github.com/Enthreeka/go-service-notification/internal/notification/repo/postgres"
-	usecase2 "github.com/Enthreeka/go-service-notification/internal/notification/usecase"
+	pg "github.com/Enthreeka/go-service-notification/internal/notification/repo/postgres"
+	"github.com/Enthreeka/go-service-notification/internal/notification/usecase"
 	"github.com/Enthreeka/go-service-notification/pkg/logger"
 	"github.com/Enthreeka/go-service-notification/pkg/postgres"
 	"github.com/gofiber/fiber/v2"
@@ -19,14 +19,17 @@ func Run(log *logger.Logger, cfg *config.Config) error {
 	}
 	defer psql.Close()
 
-	clientRepoPG := postgres3.NewClientRepositoryPG(psql)
-	notificationRepoPG := postgres3.NewNotificationRepositoryPG(psql)
+	clientRepoPG := pg.NewClientRepositoryPG(psql)
+	notificationRepoPG := pg.NewNotificationRepositoryPG(psql)
+	messageRepoPG := pg.NewMessageRepositoryPG(psql)
 
-	clientUsecase := usecase2.NewClientUsecase(clientRepoPG, log)
-	notificationUsecase := usecase2.NewNotificationUsecase(notificationRepoPG, log)
+	clientUsecase := usecase.NewClientUsecase(clientRepoPG, log)
+	notificationUsecase := usecase.NewNotificationUsecase(notificationRepoPG, log)
+	messageUsecase := usecase.NewMessageUsecase(messageRepoPG, log)
 
 	clientHandler := http2.NewClientHandler(clientUsecase, log)
 	notificationHandler := http2.NewNotificationHandler(notificationUsecase, log)
+	messageHandler := http2.NewMessageHandler(messageUsecase, log)
 
 	app := fiber.New()
 
@@ -40,6 +43,10 @@ func Run(log *logger.Logger, cfg *config.Config) error {
 	v2.Post("/update", notificationHandler.UpdateNotificationHandler)
 	v2.Post("/stata", notificationHandler.GetStatNotificationHandler)
 	v2.Delete("/delete", notificationHandler.DeleteNotificationHandler)
+
+	v3 := app.Group("/message")
+	v3.Get("/info", messageHandler.GetDetailInfoHandler)
+	v3.Get("/group", messageHandler.GetGroupByStatusHandler)
 
 	log.Info("Starting http server: %s:%s", cfg.NotificationHTTTPServer.TypeServer, cfg.NotificationHTTTPServer.Port)
 	if err = app.Listen(fmt.Sprintf(":%s", cfg.NotificationHTTTPServer.Port)); err != nil {

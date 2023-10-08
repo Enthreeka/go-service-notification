@@ -6,7 +6,6 @@ import (
 	"github.com/Enthreeka/go-service-notification/internal/entity"
 	"github.com/Enthreeka/go-service-notification/internal/mail"
 	"github.com/Enthreeka/go-service-notification/pkg/logger"
-	"github.com/google/uuid"
 	"time"
 )
 
@@ -34,7 +33,7 @@ func (m *mailUsecase) GetTime(ctx context.Context) ([]entity.ClientsMessage, err
 
 func (m *mailUsecase) CreateMessageInfo(ctx context.Context, clientMessage *entity.ClientsMessage) error {
 	message := &entity.Message{
-		ID:             uuid.New().String(),
+		ID:             clientMessage.ID,
 		NotificationID: clientMessage.NotificationID,
 		ClientID:       clientMessage.ClientID,
 		CreatedAt:      time.Now(),

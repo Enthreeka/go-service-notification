@@ -7,8 +7,10 @@ import (
 	"fmt"
 	"github.com/Enthreeka/go-service-notification/internal/entity"
 	"github.com/Enthreeka/go-service-notification/internal/mail"
+	"github.com/google/uuid"
 	"io"
 	"net/http"
+	"strconv"
 )
 
 type mailRequest struct {
@@ -27,8 +29,9 @@ func NewMailRequest(mailUsecase mail.MailService, signalMessageCh chan []entity.
 func (m *mailRequest) SendRequestAPI(ctx context.Context, token string, clientsMessage []entity.ClientsMessage) error {
 	bearer := "Bearer " + token
 
+	id := uuid.New().String()
 	for _, value := range clientsMessage {
-		api := "https://probe.fbrq.cloud/v1/send/" + "123"
+		api := "https://probe.fbrq.cloud/v1/send/" + "12"
 
 		client := &http.Client{}
 
@@ -65,7 +68,9 @@ func (m *mailRequest) SendRequestAPI(ctx context.Context, token string, clientsM
 			return err
 		}
 
-		value.Status = resp.Status
+		value.ID = id
+
+		value.Status = strconv.Itoa(resp.StatusCode)
 
 		bodyString := string(bodyBytes)
 

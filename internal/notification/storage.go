@@ -19,3 +19,8 @@ type NotificationStorage interface {
 	Delete(ctx context.Context, createdAt time.Time) error
 	GetByCreateAt(ctx context.Context, createdAt time.Time) ([]entity.Notification, error)
 }
+
+type MessageStorage interface {
+	GetAllByID(ctx context.Context, id string) (map[string][]entity.MessageInfo, error)
+	GetAll(ctx context.Context) (map[string][]entity.MessageInfo, error)
+}

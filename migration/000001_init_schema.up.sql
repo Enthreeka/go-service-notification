@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS message(
     client_id uuid not null,
     created_at timestamp not null,
     status varchar(20) not null,
-    primary key (id),
+    primary key (notification_id,client_id),
     foreign key (notification_id)
         references notification (id),
     foreign key (client_id)
@@ -44,3 +44,28 @@ CREATE TABLE IF NOT EXISTS message(
 );
 
 
+SELECT
+    message.status, COUNT(*),
+FROM
+    message
+        INNER JOIN notification  ON message.notification_id = notification.id
+GROUP BY
+    message.status;
+
+SELECT
+    n.id AS notification_id,
+    .status AS message_status,
+    COUNT(*) AS message_count
+FROM
+    message
+        INNER JOIN
+    notification n ON m.notification_id = n.id
+GROUP BY
+    n.id,
+    m.status;
+
+SELECT notification.id, notification.message, message.status, COUNT(*)
+    FROM message
+    JOIN notification ON notification.id = message.notification_id
+GROUP BY
+    notification.id, notification.message,message.status;

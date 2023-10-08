@@ -18,3 +18,8 @@ type NotificationService interface {
 	DeleteNotification(ctx context.Context, request *dto.TimeNotificationRequest) error
 	GetByCreateTime(ctx context.Context, request *dto.TimeNotificationRequest) ([]entity.Notification, error)
 }
+
+type MessageService interface {
+	GetInfoNotification(ctx context.Context, id string) (map[string][]entity.MessageInfo, error)
+	GetAllGroupByStatus(ctx context.Context) (map[string][]entity.MessageInfo, error)
+}
