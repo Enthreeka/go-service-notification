@@ -121,16 +121,16 @@ func (n *notificationHandler) DeleteNotificationHandler(c *fiber.Ctx) error {
 }
 
 // GetStatNotificationHandler godoc
-// @Summary Delete Notification
+// @Summary get Notification
 // @Tags notification
-// @Description delete notification
+// @Description get notification
 // @Accept json
 // @Produce json
 // @Param input body dto.TimeNotificationRequest true "Get info by his created time about a specific notification "
 // @Success 200 {object} []entity.Notification
 // @Failure 400 {object} apperror.AppError
 // @Failure 500 {object} apperror.AppError
-// @Router /api/notification/stata [Get]
+// @Router /api/notification/:time [Post]
 func (n *notificationHandler) GetStatNotificationHandler(c *fiber.Ctx) error {
 	notificationRequest := &dto.TimeNotificationRequest{}
 

@@ -34,7 +34,7 @@ func Run(log *logger.Logger, cfg *config.Config) error {
 
 	app := fiber.New()
 
-	app.Get("/swagger/*", swagger.HandlerDefault)
+	app.Get("/docs/*", swagger.HandlerDefault)
 
 	v1 := app.Group("/api")
 
@@ -46,7 +46,7 @@ func Run(log *logger.Logger, cfg *config.Config) error {
 	v3 := v1.Group("/notification")
 	v3.Post("/create", notificationHandler.CreateNotificationHandler)
 	v3.Post("/update", notificationHandler.UpdateNotificationHandler)
-	v3.Get("/stata", notificationHandler.GetStatNotificationHandler)
+	v3.Post("/:time", notificationHandler.GetStatNotificationHandler)
 	v3.Delete("/delete", notificationHandler.DeleteNotificationHandler)
 
 	v4 := v1.Group("/message")

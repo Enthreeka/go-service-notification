@@ -37,7 +37,11 @@ func (m *mailUsecase) CreateMessageInfo(ctx context.Context, clientMessage *enti
 		NotificationID: clientMessage.NotificationID,
 		ClientID:       clientMessage.ClientID,
 		CreatedAt:      time.Now(),
-		Status:         clientMessage.Status,
+	}
+	if clientMessage.InTime == false {
+		message.Status = "didn't have enough time"
+	} else {
+		message.Status = clientMessage.Status
 	}
 
 	err := m.mailRepo.CreateMessage(ctx, message)

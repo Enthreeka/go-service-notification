@@ -5,10 +5,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/Enthreeka/go-service-notification/internal/apperror"
 	"github.com/Enthreeka/go-service-notification/internal/entity"
 	"github.com/Enthreeka/go-service-notification/internal/mail"
 	"github.com/google/uuid"
-	"io"
+	"math/rand"
 	"net/http"
 	"strconv"
 )
@@ -30,55 +31,65 @@ func (m *mailRequest) SendRequestAPI(ctx context.Context, token string, clientsM
 	bearer := "Bearer " + token
 
 	id := uuid.New().String()
+	randID := rand.Int()
+
 	for _, value := range clientsMessage {
-		api := "https://probe.fbrq.cloud/v1/send/" + "12"
-
-		client := &http.Client{}
-
-		body := struct {
-			Id    int    `json:"id"`
-			Phone string `json:"phone"`
-			Text  string `json:"text"`
-		}{
-			Id:    123,
-			Phone: value.PhoneNumber,
-			Text:  value.Message,
-		}
-		bodyByte, _ := json.Marshal(body)
-
-		req, err := http.NewRequest("POST", api, bytes.NewBuffer(bodyByte))
-		if err != nil {
-			return err
-		}
-
-		req.WithContext(ctx)
-
-		req.Header.Set("Authorization", bearer)
-		req.Header.Add("Accept", "application/json")
-
-		resp, err := client.Do(req)
-		if err != nil {
-			return err
-		}
-
-		defer resp.Body.Close()
-
-		bodyBytes, err := io.ReadAll(resp.Body)
-		if err != nil {
-			return err
-		}
-
 		value.ID = id
 
-		value.Status = strconv.Itoa(resp.StatusCode)
+		select {
+		case <-ctx.Done():
+			err := m.mailUsecase.CreateMessageInfo(context.Background(), &value)
+			if err != nil {
+				return err
+			}
 
-		bodyString := string(bodyBytes)
+			return apperror.NewError("time has disappeared", ctx.Err())
+		default:
 
-		fmt.Println(bodyString)
+			api := fmt.Sprintf("https://probe.fbrq.cloud/v1/send/%d", randID)
 
-		err = m.mailUsecase.CreateMessageInfo(ctx, &value)
-		if err != nil {
-			return err
+			client := &http.Client{}
+
+			body := struct {
+				Id    int    `json:"id"`
+				Phone string `json:"phone"`
+				Text  string `json:"text"`
+			}{
+				Id:    randID,
+				Phone: value.PhoneNumber,
+				Text:  value.Message,
+			}
+			bodyByte, _ := json.Marshal(body)
+
+			req, err := http.NewRequest("POST", api, bytes.NewBuffer(bodyByte))
+			if err != nil {
+				return err
+			}
+
+			req.WithContext(ctx)
+
+			req.Header.Set("Authorization", bearer)
+			req.Header.Add("Accept", "application/json")
+
+			resp, err := client.Do(req)
+			if err != nil {
+				return err
+			}
+
+			resp.Body.Close()
+
+			//bodyBytes, err := io.ReadAll(resp.Body)
+			//if err != nil {
+			//	return err
+			//}
+
+			value.InTime = true
+			value.Status = strconv.Itoa(resp.StatusCode)
+
+			err = m.mailUsecase.CreateMessageInfo(context.Background(), &value)
+			if err != nil {
+				return err
+			}
 		}
 	}
 

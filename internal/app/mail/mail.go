@@ -35,11 +35,22 @@ func Run(log *logger.Logger, cfg *config.Config) error {
 		for {
 			select {
 			case clientsMessage := <-signalMessageCh:
-				err = mailRequest.SendRequestAPI(context.Background(), cfg.ExternalAPI.JWT, clientsMessage)
+
+				deadline := clientsMessage[0].ExpiresAt
+				parsedDeadline, err := time.Parse("2006-01-02 15:04:05 -0700 UTC", deadline)
 				if err != nil {
 					log.Error("%v", err)
 				}
+
+				ctx, cancel := context.WithDeadline(context.Background(), parsedDeadline)
+
+				err = mailRequest.SendRequestAPI(ctx, cfg.ExternalAPI.JWT, clientsMessage)
+				if err != nil {
+					log.Error("%v", err)
+				}
+
 				log.Info("%v", clientsMessage)
+				cancel()
 			}
 		}
 	}()
@@ -60,6 +71,7 @@ func Run(log *logger.Logger, cfg *config.Config) error {
 				if len(clientsMessage) == 0 {
 					log.Info("no one message in: %v", time.Now())
 				} else {
+					log.Info("there is a new notification")
 					signalMessageCh <- clientsMessage
 				}
 

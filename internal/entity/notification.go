@@ -10,7 +10,7 @@ type Notification struct {
 	Message          string   `json:"message"`
 	CreateAt         string   `json:"create_at"`
 	ExpiresAt        string   `json:"expires_at"`
-	ClientPropertyID []string `json:"id_client_properties"`
+	ClientPropertyID []string `json:"id_client_properties,omitempty"`
 
 	ClientProperty []ClientProperty `json:"client_property"`
 }

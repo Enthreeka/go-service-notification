@@ -20,6 +20,7 @@ type ClientsMessage struct {
 	PhoneNumber    string `json:"phone_number"`
 
 	Status string `json:"-"`
+	InTime bool   `json:"-"`
 }
 
 type MessageInfo struct {

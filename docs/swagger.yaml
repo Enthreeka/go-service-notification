@@ -277,6 +277,38 @@ paths:
       summary: Get Messages
       tags:
       - message
+  /api/notification/:time:
+    post:
+      consumes:
+      - application/json
+      description: Get notification
+      parameters:
+      - description: 'Get info by his created time about a specific notification '
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/dto.TimeNotificationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.Notification'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      summary: Delete Notification
+      tags:
+      - notification
   /api/notification/create:
     post:
       consumes:
@@ -322,38 +354,6 @@ paths:
       responses:
         "204":
           description: No Content
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/apperror.AppError'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/apperror.AppError'
-      summary: Delete Notification
-      tags:
-      - notification
-  /api/notification/stata:
-    get:
-      consumes:
-      - application/json
-      description: delete notification
-      parameters:
-      - description: 'Get info by his created time about a specific notification '
-        in: body
-        name: input
-        required: true
-        schema:
-          $ref: '#/definitions/dto.TimeNotificationRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/entity.Notification'
-            type: array
         "400":
           description: Bad Request
           schema:

@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS message(
     notification_id uuid not null,
     client_id uuid not null,
     created_at timestamp not null,
-    status varchar(20) not null,
+    status varchar(25) not null,
     primary key (notification_id,client_id),
     foreign key (notification_id)
         references notification (id),
