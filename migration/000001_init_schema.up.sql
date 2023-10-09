@@ -42,30 +42,3 @@ CREATE TABLE IF NOT EXISTS message(
     foreign key (client_id)
         references client (id)
 );
-
-
-SELECT
-    message.status, COUNT(*),
-FROM
-    message
-        INNER JOIN notification  ON message.notification_id = notification.id
-GROUP BY
-    message.status;
-
-SELECT
-    n.id AS notification_id,
-    .status AS message_status,
-    COUNT(*) AS message_count
-FROM
-    message
-        INNER JOIN
-    notification n ON m.notification_id = n.id
-GROUP BY
-    n.id,
-    m.status;
-
-SELECT notification.id, notification.message, message.status, COUNT(*)
-    FROM message
-    JOIN notification ON notification.id = message.notification_id
-GROUP BY
-    notification.id, notification.message,message.status;
