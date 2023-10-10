@@ -140,7 +140,7 @@ func (m *mailRequest) SendRequestAPIAfterSignal(ctx context.Context, token strin
 		value.InTime = true
 		value.Status = strconv.Itoa(resp.StatusCode)
 
-		err = m.mailUsecase.CreateMessageInfo(context.Background(), &value)
+		err = m.mailUsecase.CreateMessageInfo(ctx, &value)
 		if err != nil {
 			return err
 		}

@@ -23,7 +23,7 @@ func Run(log *logger.Logger, cfg *config.Config) error {
 	// For message with default checking db
 	signalMessageCh := make(chan []entity.ClientsMessage)
 	// For message when created time is less than time now
-	signalDBCh := make(chan []entity.ClientsMessage)
+	signalDBCh := make(chan []entity.ClientsMessage, 10)
 
 	mailRepo := repo.NewMailRepositoryPG(psql)
 	mailUsecase := usecase.NewMailUsecase(mailRepo, log)
@@ -73,7 +73,7 @@ func Run(log *logger.Logger, cfg *config.Config) error {
 				}
 
 				if len(clientsMessage) == 0 {
-					log.Info("no one message in: %v", time.Now())
+					log.Info("no one message in notification: %v", time.Now())
 				} else {
 					log.Info("there is a new notification")
 					signalMessageCh <- clientsMessage
@@ -104,8 +104,21 @@ func Run(log *logger.Logger, cfg *config.Config) error {
 							log.Error("%v", err)
 						}
 						signalDBCh <- clientsMessage
+
 					}
+				} else {
+					log.Info("no one message in signal: %v", time.Now())
 				}
+			}
+		}
+	}()
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+
+		for {
+			select {
 			case clientsMessage := <-signalDBCh:
 				err = mailRequest.SendRequestAPIAfterSignal(context.Background(), cfg.ExternalAPI.JWT, clientsMessage)
 				if err != nil {
@@ -113,6 +126,7 @@ func Run(log *logger.Logger, cfg *config.Config) error {
 				}
 			}
 		}
+
 	}()
 
 	wg.Wait()

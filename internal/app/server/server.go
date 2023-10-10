@@ -23,9 +23,10 @@ func Run(log *logger.Logger, cfg *config.Config) error {
 	clientRepoPG := pg.NewClientRepositoryPG(psql)
 	notificationRepoPG := pg.NewNotificationRepositoryPG(psql)
 	messageRepoPG := pg.NewMessageRepositoryPG(psql)
+	signalRepoPG := pg.NewSignalRepositoryPG(psql)
 
 	clientUsecase := usecase.NewClientUsecase(clientRepoPG, log)
-	notificationUsecase := usecase.NewNotificationUsecase(notificationRepoPG, log)
+	notificationUsecase := usecase.NewNotificationUsecase(notificationRepoPG, signalRepoPG, log)
 	messageUsecase := usecase.NewMessageUsecase(messageRepoPG, log)
 
 	clientHandler := http2.NewClientHandler(clientUsecase, log)

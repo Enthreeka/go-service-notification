@@ -1,8 +1,6 @@
 package entity
 
-import (
-	"time"
-)
+import "time"
 
 type Notification struct {
 	ID               string   `json:"id,omitempty"`
@@ -26,3 +24,14 @@ func IsCorrectTime(value string) bool {
 
 	return true
 }
+
+//
+//func IsCorrectCreateAt(createAtStr string) bool {
+//	createAt, err := time.Parse("15:04 02.01.2006", createAtStr)
+//	if err != nil {
+//		fmt.Println(err)
+//		return false
+//	}
+//
+//	return createAt.After(time.Now())
+//}

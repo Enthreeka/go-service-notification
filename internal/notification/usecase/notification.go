@@ -12,24 +12,25 @@ import (
 
 type notificationUsecase struct {
 	notificationRepoPG notification.NotificationStorage
+	signalRepoPG       notification.Signal
 
 	log *logger.Logger
 }
 
-func NewNotificationUsecase(notificationRepoPG notification.NotificationStorage, log *logger.Logger) notification.NotificationService {
+func NewNotificationUsecase(notificationRepoPG notification.NotificationStorage, signalRepoPG notification.Signal, log *logger.Logger) notification.NotificationService {
 	return &notificationUsecase{
 		notificationRepoPG: notificationRepoPG,
+		signalRepoPG:       signalRepoPG,
 		log:                log,
 	}
 }
 
 func (n *notificationUsecase) CreateNotification(ctx context.Context, request *dto.CreateNotificationRequest) error {
-	if !entity.IsCorrectTime(request.ExpiresAt) || entity.IsCorrectTime(request.CreateAt) {
-		return nil
-	}
-
-	if !entity.IsCorrectTime(request.ExpiresAt) || !entity.IsCorrectTime(request.CreateAt) {
-		return apperror.ErrIncorrectTime
+	if !entity.IsCorrectTime(request.CreateAt) {
+		err := n.signalRepoPG.Create(ctx, request.CreateAt)
+		if err != nil {
+			return apperror.NewError("failed with signal db", err)
+		}
 	}
 
 	notification := &entity.Notification{

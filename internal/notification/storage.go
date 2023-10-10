@@ -24,3 +24,7 @@ type MessageStorage interface {
 	GetAllByID(ctx context.Context, id string) (map[string][]entity.MessageInfo, error)
 	GetAll(ctx context.Context) (map[string][]entity.MessageInfo, error)
 }
+
+type Signal interface {
+	Create(ctx context.Context, time string) error
+}
