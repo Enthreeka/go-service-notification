@@ -42,3 +42,10 @@ CREATE TABLE IF NOT EXISTS message(
     foreign key (client_id)
         references client (id)
 );
+
+
+CREATE TABLE IF NOT EXISTS signal(
+    id int generated always as identity,
+    created_at timestamp not null,
+    primary key (id)
+);

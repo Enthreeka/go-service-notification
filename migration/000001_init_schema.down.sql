@@ -7,3 +7,5 @@ DROP TABLE notification;
 
 DROP TABLE client_properties;
 
+DROP TABLE signal;
+

@@ -22,8 +22,12 @@ func NewMailUsecase(mailRepo mail.MailStorage, log *logger.Logger) mail.MailServ
 	}
 }
 
-func (m *mailUsecase) GetTime(ctx context.Context) ([]entity.ClientsMessage, error) {
-	clientsMessage, err := m.mailRepo.GetMailing(ctx)
+func (m *mailUsecase) GetMail(ctx context.Context, t time.Time) ([]entity.ClientsMessage, error) {
+	if t.IsZero() {
+		t = time.Now().Truncate(time.Minute)
+	}
+
+	clientsMessage, err := m.mailRepo.GetMailing(ctx, t)
 	if err != nil {
 		return nil, apperror.NewError("failed with getting method", err)
 	}
@@ -50,4 +54,13 @@ func (m *mailUsecase) CreateMessageInfo(ctx context.Context, clientMessage *enti
 	}
 
 	return nil
+}
+
+func (m *mailUsecase) GetSignal(ctx context.Context) ([]time.Time, error) {
+	t, err := m.mailRepo.GetCreatedAt(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return t, nil
 }

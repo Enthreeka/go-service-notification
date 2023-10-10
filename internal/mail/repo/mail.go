@@ -31,16 +31,16 @@ func (m *mailRepositoryPG) CreateMessage(ctx context.Context, message *entity.Me
 	return err
 }
 
-func (m *mailRepositoryPG) GetMailing(ctx context.Context) ([]entity.ClientsMessage, error) {
+func (m *mailRepositoryPG) GetMailing(ctx context.Context, t time.Time) ([]entity.ClientsMessage, error) {
 	query := `SELECT notification.id, notification.created_at, notification.message, notification.expires_at,
 					   client.id, client.phone_number
 				FROM notification
 				JOIN client ON notification.id_client_properties = client.id_client_properties
 				WHERE notification.created_at = date_trunc('minute', $1::timestamp)`
 
-	currentTime := time.Now().Truncate(time.Minute)
+	//currentTime := time.Now().Truncate(time.Minute)
 
-	rows, err := m.Pool.Query(ctx, query, currentTime)
+	rows, err := m.Pool.Query(ctx, query, t)
 	if err != nil {
 		return nil, err
 	}
@@ -72,9 +72,33 @@ func (m *mailRepositoryPG) GetMailing(ctx context.Context) ([]entity.ClientsMess
 		return nil, err
 	}
 
-	// 1. В случае если pgx.ErrNoRows возвращать ошибку, далее ее выводить в лог в mail.Run()
-	// 2. В случае если время совпало, то вернуться структуру(создать новую)
-	// 3. Далее при рассылке сообщений передавать context.WithTimeout c expires_at
-
 	return clientsMessage, nil
+}
+
+func (m *mailRepositoryPG) GetCreatedAt(ctx context.Context) ([]time.Time, error) {
+	query := `SELECT created_at FROM signal`
+
+	rows, err := m.Pool.Query(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+
+	times := make([]time.Time, 0)
+	for rows.Next() {
+		var t time.Time
+
+		err := rows.Scan(&t)
+		if err != nil {
+			return nil, err
+		}
+
+		times = append(times, t)
+
+	}
+
+	if rows.Err() != nil {
+		return nil, err
+	}
+
+	return times, nil
 }

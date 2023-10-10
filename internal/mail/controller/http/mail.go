@@ -31,7 +31,6 @@ func (m *mailRequest) SendRequestAPI(ctx context.Context, token string, clientsM
 	bearer := "Bearer " + token
 
 	id := uuid.New().String()
-	randID := rand.Int()
 
 	for _, value := range clientsMessage {
 		value.ID = id
@@ -45,6 +44,7 @@ func (m *mailRequest) SendRequestAPI(ctx context.Context, token string, clientsM
 
 			return apperror.NewError("time has disappeared", ctx.Err())
 		default:
+			randID := rand.Int()
 
 			api := fmt.Sprintf("https://probe.fbrq.cloud/v1/send/%d", randID)
 
@@ -65,8 +65,6 @@ func (m *mailRequest) SendRequestAPI(ctx context.Context, token string, clientsM
 			if err != nil {
 				return err
 			}
-
-			req.WithContext(ctx)
 
 			req.Header.Set("Authorization", bearer)
 			req.Header.Add("Accept", "application/json")
@@ -90,6 +88,61 @@ func (m *mailRequest) SendRequestAPI(ctx context.Context, token string, clientsM
 			if err != nil {
 				return err
 			}
+		}
+	}
+
+	return nil
+}
+
+func (m *mailRequest) SendRequestAPIAfterSignal(ctx context.Context, token string, clientsMessage []entity.ClientsMessage) error {
+	bearer := "Bearer " + token
+
+	id := uuid.New().String()
+	for _, value := range clientsMessage {
+		randID := rand.Int()
+		value.ID = id
+
+		api := fmt.Sprintf("https://probe.fbrq.cloud/v1/send/%d", randID)
+
+		client := &http.Client{}
+
+		body := struct {
+			Id    int    `json:"id"`
+			Phone string `json:"phone"`
+			Text  string `json:"text"`
+		}{
+			Id:    randID,
+			Phone: value.PhoneNumber,
+			Text:  value.Message,
+		}
+		bodyByte, _ := json.Marshal(body)
+
+		req, err := http.NewRequest("POST", api, bytes.NewBuffer(bodyByte))
+		if err != nil {
+			return err
+		}
+
+		req.Header.Set("Authorization", bearer)
+		req.Header.Add("Accept", "application/json")
+
+		resp, err := client.Do(req)
+		if err != nil {
+			return err
+		}
+
+		resp.Body.Close()
+
+		//bodyBytes, err := io.ReadAll(resp.Body)
+		//if err != nil {
+		//	return err
+		//}
+
+		value.InTime = true
+		value.Status = strconv.Itoa(resp.StatusCode)
+
+		err = m.mailUsecase.CreateMessageInfo(context.Background(), &value)
+		if err != nil {
+			return err
 		}
 	}
 

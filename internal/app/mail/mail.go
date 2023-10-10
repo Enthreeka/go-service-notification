@@ -20,7 +20,10 @@ func Run(log *logger.Logger, cfg *config.Config) error {
 	}
 	defer psql.Close()
 
+	// For message with default checking db
 	signalMessageCh := make(chan []entity.ClientsMessage)
+	// For message when created time is less than time now
+	signalDBCh := make(chan []entity.ClientsMessage)
 
 	mailRepo := repo.NewMailRepositoryPG(psql)
 	mailUsecase := usecase.NewMailUsecase(mailRepo, log)
@@ -35,7 +38,6 @@ func Run(log *logger.Logger, cfg *config.Config) error {
 		for {
 			select {
 			case clientsMessage := <-signalMessageCh:
-
 				deadline := clientsMessage[0].ExpiresAt
 				parsedDeadline, err := time.Parse("2006-01-02 15:04:05 -0700 UTC", deadline)
 				if err != nil {
@@ -55,6 +57,8 @@ func Run(log *logger.Logger, cfg *config.Config) error {
 		}
 	}()
 
+	// Goroutine checking every 1 minutes notification database, in case when time now == time in the db
+	// will be sent to users
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
@@ -63,7 +67,7 @@ func Run(log *logger.Logger, cfg *config.Config) error {
 		for {
 			select {
 			case <-timeChecker.C:
-				clientsMessage, err := mailUsecase.GetTime(context.Background())
+				clientsMessage, err := mailUsecase.GetMail(context.Background(), time.Time{})
 				if err != nil {
 					log.Error("%v", err)
 				}
@@ -76,7 +80,37 @@ func Run(log *logger.Logger, cfg *config.Config) error {
 				}
 
 			}
+		}
+	}()
 
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+
+		timeChecker := time.NewTicker(1 * time.Minute)
+		for {
+			select {
+			case <-timeChecker.C:
+				createdTimes, err := mailUsecase.GetSignal(context.Background())
+				if err != nil {
+					log.Error("%v", err)
+				}
+
+				if len(createdTimes) > 0 {
+					for _, t := range createdTimes {
+						clientsMessage, err := mailUsecase.GetMail(context.Background(), t)
+						if err != nil {
+							log.Error("%v", err)
+						}
+						signalDBCh <- clientsMessage
+					}
+				}
+			case clientsMessage := <-signalDBCh:
+				err = mailRequest.SendRequestAPIAfterSignal(context.Background(), cfg.ExternalAPI.JWT, clientsMessage)
+				if err != nil {
+					log.Error("%v", err)
+				}
+			}
 		}
 	}()
 

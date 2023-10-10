@@ -24,13 +24,13 @@ func NewNotificationUsecase(notificationRepoPG notification.NotificationStorage,
 }
 
 func (n *notificationUsecase) CreateNotification(ctx context.Context, request *dto.CreateNotificationRequest) error {
+	if !entity.IsCorrectTime(request.ExpiresAt) || entity.IsCorrectTime(request.CreateAt) {
+		return nil
+	}
+
 	if !entity.IsCorrectTime(request.ExpiresAt) || !entity.IsCorrectTime(request.CreateAt) {
 		return apperror.ErrIncorrectTime
 	}
-
-	//if !entity.IsCorrectTime(request.ExpiresAt) || entity.IsCorrectTime(request.CreateAt) {
-	//	return apperror.ErrIncorrectTime
-	//}
 
 	notification := &entity.Notification{
 		Message:   request.Message,
