@@ -28,9 +28,9 @@ func (n *notificationUsecase) CreateNotification(ctx context.Context, request *d
 		return apperror.ErrIncorrectTime
 	}
 
-	if !entity.IsCorrectTime(request.ExpiresAt) || entity.IsCorrectTime(request.CreateAt) {
-		return apperror.ErrIncorrectTime
-	}
+	//if !entity.IsCorrectTime(request.ExpiresAt) || entity.IsCorrectTime(request.CreateAt) {
+	//	return apperror.ErrIncorrectTime
+	//}
 
 	notification := &entity.Notification{
 		Message:   request.Message,

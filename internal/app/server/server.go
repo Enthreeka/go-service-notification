@@ -46,11 +46,11 @@ func Run(log *logger.Logger, cfg *config.Config) error {
 	v3 := v1.Group("/notification")
 	v3.Post("/create", notificationHandler.CreateNotificationHandler)
 	v3.Post("/update", notificationHandler.UpdateNotificationHandler)
-	v3.Post("/:time", notificationHandler.GetStatNotificationHandler)
+	v3.Post("/stat", notificationHandler.GetStatNotificationHandler)
 	v3.Delete("/delete", notificationHandler.DeleteNotificationHandler)
 
 	v4 := v1.Group("/message")
-	v4.Get("/info", messageHandler.GetDetailInfoHandler)
+	v4.Get("/info/:id", messageHandler.GetDetailInfoHandler)
 	v4.Get("/group", messageHandler.GetGroupByStatusHandler)
 
 	log.Info("Starting http server: %s:%s", cfg.NotificationHTTTPServer.TypeServer, cfg.NotificationHTTTPServer.Port)

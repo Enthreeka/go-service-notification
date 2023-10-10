@@ -5,7 +5,6 @@ import (
 	"fmt"
 )
 
-// swagger:parameters apperror.AppError
 type AppError struct {
 	Msg string `json:"message"`
 	Err error  `json:"-"`
@@ -18,6 +17,8 @@ var ErrIncorrectTime = NewError("the requested time is less than the present", e
 var ErrClientAttribute = NewError("the client attribute is empty", errors.New("not_found_id"))
 
 var ErrEmptyNotification = NewError("so far there are no mailings in the database", errors.New("not_found_notification"))
+
+var ErrNotFound = NewError("not found in database", errors.New("not_found"))
 
 func (a *AppError) Error() string {
 	return fmt.Sprintf("%s: %v", a.Msg, a.Err)

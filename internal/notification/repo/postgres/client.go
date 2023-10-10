@@ -74,11 +74,6 @@ func (c *clientRepositoryPG) Create(ctx context.Context, client *entity.Client) 
 	return err
 }
 
-// Необходимо реализовать обновление атрибутов клиента
-// Если попало поле тега с оператором кода, сперва проверяем, есть ли такие в таблице client_properties
-// В случае, если есть получаем id из данной таблицы, и обновляем с новыми атрибутами и новым внешним ключом
-// В случае, если нет создаем новое поле в таблице client_properties и добавляем его к новым атрибутом
-
 func (c *clientRepositoryPG) Update(ctx context.Context, client *entity.Client) error {
 	var counter int
 	args := []interface{}{}

@@ -5,7 +5,6 @@ import (
 	"errors"
 	_ "github.com/Enthreeka/go-service-notification/docs"
 	"github.com/Enthreeka/go-service-notification/internal/apperror"
-	"github.com/Enthreeka/go-service-notification/internal/entity"
 	"github.com/Enthreeka/go-service-notification/internal/entity/dto"
 	"github.com/Enthreeka/go-service-notification/internal/notification"
 	"github.com/Enthreeka/go-service-notification/pkg/logger"
@@ -98,21 +97,21 @@ func (u *clientHandler) UpdateClientHandler(c *fiber.Ctx) error {
 // @Description delete client
 // @Accept json
 // @Produce json
-// @Param input body entity.Client true "Client ID"
+// @Param input body dto.IDMessageRequest true "Client ID"
 // @Success 204
 // @Failure 400 {object} apperror.AppError
 // @Failure 500 {object} apperror.AppError
 // @Router /api/client/delete [Delete]
 func (u *clientHandler) DeleteClientHandler(c *fiber.Ctx) error {
-	client := &entity.Client{}
+	id := &dto.IDMessageRequest{}
 
-	err := c.BodyParser(client)
+	err := c.BodyParser(id)
 	if err != nil {
 		u.log.Error("failed to parse request body: %v", err)
 		return c.Status(fiber.StatusBadRequest).JSON(apperror.NewError("Invalid request body", err))
 	}
 
-	err = u.clientUsecase.DeleteClient(context.Background(), client.ID)
+	err = u.clientUsecase.DeleteClient(context.Background(), id.Id)
 	if err != nil {
 		u.log.Error("delete client controller: %v", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(err)

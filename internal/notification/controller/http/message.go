@@ -4,7 +4,6 @@ import (
 	"context"
 	_ "github.com/Enthreeka/go-service-notification/docs"
 	"github.com/Enthreeka/go-service-notification/internal/apperror"
-	"github.com/Enthreeka/go-service-notification/internal/entity/dto"
 	"github.com/Enthreeka/go-service-notification/internal/notification"
 	"github.com/Enthreeka/go-service-notification/pkg/logger"
 	"github.com/gofiber/fiber/v2"
@@ -26,27 +25,28 @@ func NewMessageHandler(messageUsecase notification.MessageService, log *logger.L
 // GetDetailInfoHandler godoc
 // @Summary Get Messages
 // @Tags message
-// @Description get message
+// @Description get message by id
 // @Accept json
 // @Produce json
-// @Param input body dto.IDMessageRequest true "Get detail data from message"
+// @Param id path string true "ID of the message"
 // @Success 200 {object} map[string][]entity.MessageInfo
 // @Failure 400 {object} apperror.AppError
+// @Failure 404 {object} apperror.AppError
 // @Failure 500 {object} apperror.AppError
-// @Router /api/message/info [get]
+// @Router /api/message/info/{id} [get]
 func (m *messageHandler) GetDetailInfoHandler(c *fiber.Ctx) error {
-	id := &dto.IDMessageRequest{}
+	id := c.Params("id")
 
-	err := c.BodyParser(id)
-	if err != nil {
-		m.log.Error("failed to parse request body: %v", err)
-		return c.Status(fiber.StatusBadRequest).JSON(apperror.NewError("Invalid request body", err))
-	}
+	m.log.Info("%s", id)
 
-	message, err := m.messageUsecase.GetInfoNotification(context.Background(), id.Id)
+	message, err := m.messageUsecase.GetInfoNotification(context.Background(), id)
 	if err != nil {
 		m.log.Error("get info controller: %v", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(err)
+	}
+
+	if len(message) == 0 {
+		return c.Status(fiber.StatusNotFound).JSON(apperror.ErrNotFound)
 	}
 
 	return c.Status(fiber.StatusOK).JSON(message)
@@ -55,7 +55,7 @@ func (m *messageHandler) GetDetailInfoHandler(c *fiber.Ctx) error {
 // GetGroupByStatusHandler godoc
 // @Summary Get Messages Group By
 // @Tags message
-// @Description get message
+// @Description get all messages
 // @Produce json
 // @Success 200 {object} map[string][]entity.MessageInfo
 // @Failure 500 {object} apperror.AppError

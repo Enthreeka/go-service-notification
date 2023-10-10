@@ -32,7 +32,7 @@ func NewNotificationHandler(notificationUsecase notification.NotificationService
 // @Produce json
 // @Param input body dto.CreateNotificationRequest true "Client new notification"
 // @Success 201
-// @Failure 400 {object} apperror.AppError
+// @Failure 404 {object} apperror.AppError
 // @Failure 500 {object} apperror.AppError
 // @Router /api/notification/create [post]
 func (n *notificationHandler) CreateNotificationHandler(c *fiber.Ctx) error {
@@ -49,7 +49,7 @@ func (n *notificationHandler) CreateNotificationHandler(c *fiber.Ctx) error {
 		if errors.Is(err, apperror.ErrIncorrectTime) {
 			return c.Status(fiber.StatusBadRequest).JSON(apperror.ErrIncorrectTime)
 		} else if errors.Is(err, apperror.ErrClientAttribute) {
-			return c.Status(fiber.StatusBadRequest).JSON(apperror.ErrClientAttribute)
+			return c.Status(fiber.StatusNotFound).JSON(apperror.ErrClientAttribute)
 		}
 
 		n.log.Error("create notification controller: %v", err)
@@ -84,6 +84,7 @@ func (n *notificationHandler) UpdateNotificationHandler(c *fiber.Ctx) error {
 		if err == apperror.ErrIncorrectTime {
 			return c.Status(fiber.StatusBadRequest).JSON(apperror.ErrIncorrectTime)
 		}
+
 		n.log.Error("update notification controller: %v", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(err)
 	}
@@ -121,7 +122,7 @@ func (n *notificationHandler) DeleteNotificationHandler(c *fiber.Ctx) error {
 }
 
 // GetStatNotificationHandler godoc
-// @Summary get Notification
+// @Summary G et Notification
 // @Tags notification
 // @Description get notification
 // @Accept json
@@ -130,7 +131,7 @@ func (n *notificationHandler) DeleteNotificationHandler(c *fiber.Ctx) error {
 // @Success 200 {object} []entity.Notification
 // @Failure 400 {object} apperror.AppError
 // @Failure 500 {object} apperror.AppError
-// @Router /api/notification/:time [Post]
+// @Router /api/notification/stat [Post]
 func (n *notificationHandler) GetStatNotificationHandler(c *fiber.Ctx) error {
 	notificationRequest := &dto.TimeNotificationRequest{}
 

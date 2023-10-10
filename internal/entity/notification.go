@@ -1,7 +1,6 @@
 package entity
 
 import (
-	"fmt"
 	"time"
 )
 
@@ -22,7 +21,6 @@ func IsCorrectTime(value string) bool {
 	}
 
 	if !callTime.After(time.Now()) {
-		fmt.Println("Test")
 		return false
 	}
 
