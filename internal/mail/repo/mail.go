@@ -5,6 +5,7 @@ import (
 	"github.com/Enthreeka/go-service-notification/internal/entity"
 	"github.com/Enthreeka/go-service-notification/internal/mail"
 	"github.com/Enthreeka/go-service-notification/pkg/postgres"
+	"github.com/jackc/pgx/v5"
 	"time"
 )
 
@@ -76,9 +77,23 @@ func (m *mailRepositoryPG) GetMailing(ctx context.Context, t time.Time) ([]entit
 }
 
 func (m *mailRepositoryPG) GetCreatedAt(ctx context.Context) ([]time.Time, error) {
-	query := `SELECT created_at FROM signal`
+	querySelect := `SELECT created_at FROM signal`
+	queryDelete := `DELETE FROM signal`
 
-	rows, err := m.Pool.Query(ctx, query)
+	tx, err := m.Pool.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	defer func() {
+		if err != nil {
+			tx.Rollback(context.TODO())
+		} else {
+			tx.Commit(context.TODO())
+		}
+	}()
+
+	rows, err := tx.Query(ctx, querySelect)
 	if err != nil {
 		return nil, err
 	}
@@ -97,6 +112,11 @@ func (m *mailRepositoryPG) GetCreatedAt(ctx context.Context) ([]time.Time, error
 	}
 
 	if rows.Err() != nil {
+		return nil, err
+	}
+
+	_, err = tx.Exec(ctx, queryDelete)
+	if err != nil {
 		return nil, err
 	}
 

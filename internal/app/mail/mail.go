@@ -83,6 +83,7 @@ func Run(log *logger.Logger, cfg *config.Config) error {
 		}
 	}()
 
+	// Goroutine also checking every 1 minutes, but in signal database
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
