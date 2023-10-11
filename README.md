@@ -1,4 +1,16 @@
+# Notification Service
+>Сервис в папке cmd/mail/mail.go занимается рассылкой сообщений на вшений севрис:
+https://probe.fbrq.cloud/v1/send/{id}
 
+>Сервис в папке cmd/server/server.go занимается главной бизнес логикой
+> по сбору рассылок, созданию клиентов и тд
+> 
+## Запуск проекта 
+
+```json
+make docker-up
+make migrate-up
+```
 
 ## Инструкция по использованию
 
@@ -9,10 +21,10 @@
 | make migrate-up    | Создание миграций бд                          |
 | make migrate-down  | Удаление всех таблиц в бд                     |
 | make migrate-force | Применяется в случае dirty бд                 |
-| make docker-up | Поднятие сервисов                             |
-| make docker-down | Завершение работы сервисов                    |
-| make docker-build | Пересборка docker compose                     |
-| make docker-clear | Удаление неиспользуемых докер контейнеров     |
+| make docker-up     | Поднятие сервисов                             |
+| make docker-down   | Завершение работы сервисов                    |
+| make docker-build  | Пересборка docker compose                     |
+| make docker-clear  | Удаление неиспользуемых докер контейнеров     |
 
 ## API
 
@@ -248,3 +260,7 @@
 и в таблице notification будет добавлен true к записи with_signal;
 
 - Записи в таблице signal удяляются после их селекта.
+
+### Swagger UI:
+
+http://localhost:8080/docs
