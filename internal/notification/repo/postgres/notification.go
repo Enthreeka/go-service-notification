@@ -47,8 +47,8 @@ func (n *notificationRepositoryPG) CheckClientProperties(ctx context.Context, at
 
 func (n *notificationRepositoryPG) Create(ctx context.Context, notification *entity.Notification) error {
 	query := `INSERT INTO notification
-    (id_client_properties, created_at, message, expires_at) 
-			VALUES ($1,$2,$3,$4)`
+    (id_client_properties, created_at, message, expires_at,with_signal) 
+			VALUES ($1,$2,$3,$4,$5)`
 
 	expiresAtTime, err := time.Parse("15:04 02.01.2006", notification.ExpiresAt)
 	if err != nil {
@@ -66,6 +66,7 @@ func (n *notificationRepositoryPG) Create(ctx context.Context, notification *ent
 			createdAtTime,
 			notification.Message,
 			expiresAtTime,
+			notification.Signal,
 		)
 	}
 

@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"errors"
 	"github.com/Enthreeka/go-service-notification/internal/apperror"
 	"github.com/Enthreeka/go-service-notification/internal/entity"
 	"github.com/Enthreeka/go-service-notification/internal/mail"
@@ -25,14 +26,30 @@ func NewMailUsecase(mailRepo mail.MailStorage, log *logger.Logger) mail.MailServ
 func (m *mailUsecase) GetMail(ctx context.Context, t time.Time) ([]entity.ClientsMessage, error) {
 	if t.IsZero() {
 		t = time.Now().Truncate(time.Minute)
+
+		clientsMessage, err := m.mailRepo.GetMailing(ctx, t)
+		if err != nil {
+			return nil, apperror.NewError("failed with getting method", err)
+		}
+
+		return clientsMessage, nil
 	}
 
-	clientsMessage, err := m.mailRepo.GetMailing(ctx, t)
-	if err != nil {
-		return nil, apperror.NewError("failed with getting method", err)
+	if !t.IsZero() {
+		clientsMessage, err := m.mailRepo.GetMailingSignal(ctx, t)
+		if err != nil {
+			return nil, apperror.NewError("failed with getting method", err)
+		}
+
+		return clientsMessage, nil
 	}
 
-	return clientsMessage, nil
+	//clientsMessage, err := m.mailRepo.GetMailing(ctx, t)
+	//if err != nil {
+	//	return nil, apperror.NewError("failed with getting method", err)
+	//}
+
+	return nil, apperror.NewError("some error with time", errors.New("error_time"))
 }
 
 func (m *mailUsecase) CreateMessageInfo(ctx context.Context, clientMessage *entity.ClientsMessage) error {
@@ -42,6 +59,7 @@ func (m *mailUsecase) CreateMessageInfo(ctx context.Context, clientMessage *enti
 		ClientID:       clientMessage.ClientID,
 		CreatedAt:      time.Now(),
 	}
+
 	if clientMessage.InTime == false {
 		message.Status = "didn't have enough time"
 	} else {

@@ -75,7 +75,7 @@ func Run(log *logger.Logger, cfg *config.Config) error {
 				if len(clientsMessage) == 0 {
 					log.Info("no one message in notification: %v", time.Now())
 				} else {
-					log.Info("there is a new notification")
+					log.Info("new notification from notification")
 					signalMessageCh <- clientsMessage
 				}
 
@@ -103,6 +103,8 @@ func Run(log *logger.Logger, cfg *config.Config) error {
 						if err != nil {
 							log.Error("%v", err)
 						}
+
+						log.Info("new notification from signal")
 						signalDBCh <- clientsMessage
 
 					}

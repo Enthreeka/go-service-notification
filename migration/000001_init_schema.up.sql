@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS notification(
     created_at timestamp not null,
     message text not null,
     expires_at timestamp not null,
+    with_signal boolean default false,
     primary key (id),
     foreign key (id_client_properties)
         references client_properties (id)
@@ -49,3 +50,5 @@ CREATE TABLE IF NOT EXISTS signal(
     created_at timestamp not null,
     primary key (id)
 );
+
+

@@ -97,6 +97,8 @@ func (m *mailRequest) SendRequestAPI(ctx context.Context, token string, clientsM
 func (m *mailRequest) SendRequestAPIAfterSignal(ctx context.Context, token string, clientsMessage []entity.ClientsMessage) error {
 	bearer := "Bearer " + token
 
+	fmt.Println("")
+
 	id := uuid.New().String()
 	for _, value := range clientsMessage {
 		randID := rand.Int()

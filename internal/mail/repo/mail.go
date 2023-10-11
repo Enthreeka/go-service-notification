@@ -78,7 +78,7 @@ func (m *mailRepositoryPG) GetMailing(ctx context.Context, t time.Time) ([]entit
 
 func (m *mailRepositoryPG) GetCreatedAt(ctx context.Context) ([]time.Time, error) {
 	querySelect := `SELECT created_at FROM signal`
-	queryDelete := `DELETE FROM signal`
+	queryDelete := `DELETE FROM signal WHERE created_at = $1`
 
 	tx, err := m.Pool.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
@@ -115,10 +115,55 @@ func (m *mailRepositoryPG) GetCreatedAt(ctx context.Context) ([]time.Time, error
 		return nil, err
 	}
 
-	_, err = tx.Exec(ctx, queryDelete)
+	for _, t := range times {
+		_, err = tx.Exec(ctx, queryDelete, t)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return times, nil
+}
+
+func (m *mailRepositoryPG) GetMailingSignal(ctx context.Context, t time.Time) ([]entity.ClientsMessage, error) {
+	query := `SELECT notification.id, notification.created_at, notification.message, notification.expires_at,
+					   client.id, client.phone_number
+				FROM notification
+				JOIN client ON notification.id_client_properties = client.id_client_properties
+				WHERE notification.created_at = date_trunc('minute', $1::timestamp)
+				AND notification.with_signal = true`
+
+	rows, err := m.Pool.Query(ctx, query, t)
 	if err != nil {
 		return nil, err
 	}
 
-	return times, nil
+	defer rows.Close()
+
+	clientsMessage := make([]entity.ClientsMessage, 0)
+	for rows.Next() {
+		var clientMessage entity.ClientsMessage
+		var createdAt time.Time
+		var expiresAt time.Time
+
+		err := rows.Scan(&clientMessage.NotificationID,
+			&createdAt,
+			&clientMessage.Message,
+			&expiresAt,
+			&clientMessage.ClientID,
+			&clientMessage.PhoneNumber)
+		if err != nil {
+			return nil, err
+		}
+
+		clientMessage.ExpiresAt = expiresAt.String()
+		clientMessage.CreatedAt = expiresAt.String()
+		clientsMessage = append(clientsMessage, clientMessage)
+	}
+
+	if rows.Err() != nil {
+		return nil, err
+	}
+
+	return clientsMessage, nil
 }

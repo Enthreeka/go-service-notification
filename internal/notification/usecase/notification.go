@@ -26,17 +26,22 @@ func NewNotificationUsecase(notificationRepoPG notification.NotificationStorage,
 }
 
 func (n *notificationUsecase) CreateNotification(ctx context.Context, request *dto.CreateNotificationRequest) error {
-	if !entity.IsCorrectTime(request.CreateAt) {
-		err := n.signalRepoPG.Create(ctx, request.CreateAt)
-		if err != nil {
-			return apperror.NewError("failed with signal db", err)
-		}
+	if !entity.IsCorrectTime(request.CreateAt) && !entity.IsCorrectTime(request.ExpiresAt) {
+		return apperror.ErrIncorrectTime
 	}
 
 	notification := &entity.Notification{
 		Message:   request.Message,
 		CreateAt:  request.CreateAt,
 		ExpiresAt: request.ExpiresAt,
+	}
+
+	if !entity.IsCorrectTime(request.CreateAt) && entity.IsCorrectTime(request.ExpiresAt) {
+		err := n.signalRepoPG.Create(ctx, request.CreateAt)
+		if err != nil {
+			return apperror.NewError("failed with signal db", err)
+		}
+		notification.Signal = true
 	}
 
 	id, err := n.existClientProperties(ctx, request)
