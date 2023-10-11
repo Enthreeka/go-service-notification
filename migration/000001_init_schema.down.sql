@@ -1,11 +1,11 @@
 
-DROP TABLE message;
+DROP TABLE IF EXISTS  message;
 
-DROP TABLE client;
+DROP TABLE IF EXISTS  client;
 
-DROP TABLE notification;
+DROP TABLE IF EXISTS notification;
 
-DROP TABLE client_properties;
+DROP TABLE IF EXISTS client_properties;
 
-DROP TABLE signal;
+DROP TABLE IF EXISTS signal;
 

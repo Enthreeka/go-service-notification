@@ -98,6 +98,12 @@ func (n *notificationRepositoryPG) Update(ctx context.Context, notification *ent
 		args = append(args, notification.Message)
 	}
 
+	if notification.Signal == true {
+		counter++
+		builder.WriteString(fmt.Sprintf(" ,with_signal = $%d", counter))
+		args = append(args, notification.Signal)
+	}
+
 	if notification.ExpiresAt != "" {
 		counter++
 		builder.WriteString(fmt.Sprintf(" ,expires_at = $%d", counter))

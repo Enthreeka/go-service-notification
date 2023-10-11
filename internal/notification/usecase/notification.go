@@ -87,11 +87,31 @@ func (n *notificationUsecase) existClientProperties(ctx context.Context, request
 }
 
 func (n *notificationUsecase) UpdateNotification(ctx context.Context, request *dto.UpdateNotificationRequest) error {
+	if request.CreateAt != "" {
+		if !entity.IsCorrectTime(request.CreateAt) {
+			return apperror.ErrIncorrectTime
+		}
+	}
+
+	if request.ExpiresAt != "" {
+		if !entity.IsCorrectTime(request.ExpiresAt) {
+			return apperror.ErrIncorrectTime
+		}
+	}
+
 	t, err := time.Parse("", request.ExpiresAt)
 	notification := &entity.Notification{
 		Message:   request.Message,
 		CreateAt:  request.CreateAt,
 		ExpiresAt: t.String(),
+	}
+
+	if !entity.IsCorrectTime(request.CreateAt) && entity.IsCorrectTime(request.ExpiresAt) {
+		err := n.signalRepoPG.Create(ctx, request.CreateAt)
+		if err != nil {
+			return apperror.NewError("failed with signal db", err)
+		}
+		notification.Signal = true
 	}
 
 	err = n.notificationRepoPG.Update(ctx, notification)
